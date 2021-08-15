@@ -501,7 +501,7 @@ def home():
 @app.route('/query/new', methods = ['GET', 'POST'])
 # @login_required
 def new():
-    global form
+    # global form
     form = QuestionsForm()
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -540,12 +540,42 @@ def new():
                 fitb(results, payload)
             if 'True/False' in payload['question_types']:
                 tfq(results, payload)
-            print(results)
-            session['payload']=payload
-            session['results'] = results
+            try:
+                data_list = {}
+                # print(payload)
+                for qtype in results.keys():
+                    # print(qtype)
+                    qtype_list = []
+                    for portion in results[qtype].keys():
+                        portion_list = []
+                        for text in results[qtype][portion]:
+                            portion_list.append({portion: text})
+                        qtype_list.append(portion_list)
+                    zipped = list(map(list, zip(*qtype_list)))
+                    data_list[qtype] = zipped
+                if payload['input_text']:
+                    payload['input_text'] = unescape(payload['input_text'])
+                    # print(form.content.data)
+                    payload['input_text'] = escape(payload['input_text'])
+                # if form.content.data:
+                #     pass
+                # print('rendering')
+                form = QuestionsForm()
+                return render_template('questions.html', input_text = payload['input_text'],
+                                    all_qtypes = data_list,
+                                    form = form)
+            except:
+                form = QuestionsForm()
+            return render_template('questions.html', input_text = '',
+                                    all_qtypes = {},
+                                    form = form)
+            # print(results)
+            # session['payload']=payload
+            # session['results'] = results
+            # print(session['payload']['input_text'])
             # print(session['results'])
             # print('next')
-            return redirect(url_for('questions'))
+            # return redirect(url_for('questions', payload = json.dumps(payload), results = json.dumps(results)), code = 307)
             # if form.upload.data.filename or form.content.data:
             #     print('all is correct')
             #     return redirect(url_for('questions'))
@@ -557,58 +587,59 @@ def new():
     # pic = current_user.profile_pic,
     #         info = [current_user.name])
 
-@app.route('/query/questions')
+# @app.route('/query/questions', methods = ['GET', 'POST'])
 # @login_required
-def questions():
-    global form
-    # try:
-    #     if form.upload.data.filename:
-    #         format = "%Y%m%d%T%H%M%S"
-    #         now = datetime.datetime.utcnow().strftime(format)
-    #         random_string = token_hex(2)
-    #         filename = random_string + "_" + now + "_" + form.upload.data.filename
-    #         filename = secure_filename(filename)
-    #         print(filename)
-    # except:
-    #     print('no upload')
+# def questions():
+#     # global form
+#     # try:
+#     #     if form.upload.data.filename:
+#     #         format = "%Y%m%d%T%H%M%S"
+#     #         now = datetime.datetime.utcnow().strftime(format)
+#     #         random_string = token_hex(2)
+#     #         filename = random_string + "_" + now + "_" + form.upload.data.filename
+#     #         filename = secure_filename(filename)
+#     #         print(filename)
+#     # except:
+#     #     print('no upload')
 
-    try:
-        payload = session['payload']
-        received = session['results']
-        results = OrderedDict()
-        results['Multiple Choice'] = received['Multiple Choice']
-        results['Yes/No'] = received['Yes/No']
-        results['Fill in the Blanks'] = received['Fill in the Blanks']
-        results['True/False'] = received['True/False']
-        data_list = {}
-        # print(received)
-        for qtype in results.keys():
-            # print(qtype)
-            qtype_list = []
-            for portion in results[qtype].keys():
-                portion_list = []
-                for text in results[qtype][portion]:
-                    portion_list.append({portion: text})
-                qtype_list.append(portion_list)
-            zipped = list(map(list, zip(*qtype_list)))
-            data_list[qtype] = zipped
-            print(data_list)
-        if payload['input_text']:
-            payload['input_text'] = unescape(form.content.data)
-            payload['input_text'] = escape(payload['input_text'])
-        if form.content.data:
-            pass
-        # print('rendering')
-        return render_template('questions.html', input_text = payload['input_text'],
-                            all_qtypes = data_list,
-                            form = form)
-    except:
-        form = QuestionsForm()
-    return render_template('questions.html', input_text = '',
-                            all_qtypes = {},
-                            form = form)
-        # pic = current_user.profile_pic,
-        #     info = [current_user.name])
+#     try:
+#         payload = session['payload']
+#         received = session['results']
+#         results = OrderedDict()
+#         results['Multiple Choice'] = received['Multiple Choice']
+#         results['Yes/No'] = received['Yes/No']
+#         results['Fill in the Blanks'] = received['Fill in the Blanks']
+#         results['True/False'] = received['True/False']
+#         data_list = {}
+#         # print(payload)
+#         for qtype in results.keys():
+#             # print(qtype)
+#             qtype_list = []
+#             for portion in results[qtype].keys():
+#                 portion_list = []
+#                 for text in results[qtype][portion]:
+#                     portion_list.append({portion: text})
+#                 qtype_list.append(portion_list)
+#             zipped = list(map(list, zip(*qtype_list)))
+#             data_list[qtype] = zipped
+#         if payload['input_text']:
+#             payload['input_text'] = unescape(payload['input_text'])
+#             # print(form.content.data)
+#             payload['input_text'] = escape(payload['input_text'])
+#         # if form.content.data:
+#         #     pass
+#         # print('rendering')
+#         form = QuestionsForm()
+#         return render_template('questions.html', input_text = payload['input_text'],
+#                             all_qtypes = data_list,
+#                             form = form)
+#     except:
+#         form = QuestionsForm()
+#     return render_template('questions.html', input_text = '',
+#                             all_qtypes = {},
+#                             form = form)
+#         # pic = current_user.profile_pic,
+#         #     info = [current_user.name])
 
 @app.errorhandler(401)
 def unauthorized(error):
@@ -622,7 +653,16 @@ def largefile(error):
 def server(error):
     return render_template('error.html')
 
+@app.errorhandler(502)
+def server(error):
+    return render_template('size.html')
+
+@app.errorhandler(413)
+def server(error):
+    return render_template('size.html')
+
 if __name__ == '__main__':
     app.run(
+        host="0.0.0.0"
         # ssl_context="adhoc",
         )
