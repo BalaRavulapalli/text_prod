@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% extends "base.html" %} 
+{% from "_error_messages.html" import field_error_messages%}
+
+{% block styling %}
+.row{
+    --bs-gutter-x: 0rem;
+}
+div.form-group>br{
+    display:none
+}
+{% endblock %}
+{% block links %} 
+    <li class="nav-item">
+        <a class="nav-link" style = "color: #a2a7ac" href="{{url_for('home')}}">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" style = "color: #ffffff" aria-current="page" href="{{url_for('new')}}">Query</a>
+    </li>
+    </li>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+    <h1 class="col-lg-10 offset-lg-1 my-4">Login!</h1>
+    <div class="col-lg-10 offset-lg-1">
+        <form method="POST" action="{{url_for('login')}}" enctype="multipart/form-data">
+                {{ login.hidden_tag() }}
+            <div class="form-group col-lg-5 mb-3">
+                {{ login.username.label}}
+                {{login.username(class="form-control") }}
+                {{field_error_messages(login.username)}}
+            </div>
+            <div class="form-group col-lg-5 mb-3">
+                {{ login.email.label}}
+                {{login.email(class="form-control") }}
+                {{field_error_messages(login.email)}}
+            </div>
+            <div class="form-group col-lg-5 mb-2">
+                {{ login.password.label}}
+                {{login.password(class="form-control") }}
+                {{field_error_messages(login.password)}}
+            </div>
+            <div class="form-group col-lg-5 mb-2">
+                {{ login.confirm.label}}
+                {{login.confirm(class="form-control") }}
+                {{field_error_messages(login.confirm)}}
+            </div>
+            <div class="form-group col-lg-5 mb-3">
+                {{ login.recaptcha }}
+                {{field_error_messages(login.recaptcha)}}
+            </div>
+            <hr>
+                {{ login.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+</div>
+{% endblock %}

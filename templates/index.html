@@ -1,0 +1,53 @@
+{% extends "base.html" %} 
+{% block styling %}
+
+.div1{
+    height: 100vh;
+    position: relative;
+}
+.outer {
+    scroll-snap-type: y proximity;
+    overflow-y: scroll;
+    height: 100vh;
+}
+.div2 {   
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    }
+    .content{
+    text-align: center;
+}
+  
+{% endblock %}
+{% block links %}
+    <li class="nav-item">
+        <a class="nav-link active" style = "color: #a2a7ac" aria-current="page" href="{{url_for('home')}}">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" style = "color: #ffffff" href="{{url_for('new')}}">Query</a>
+    </li>
+    </li>
+{% endblock %}
+{% block content %}
+
+<div class = "div1" style = "background-image: linear-gradient(45deg, #009fff, #ec2f4b); color: #f5f5f7;">
+    <div class = "div2">
+        <h1 class = "content">Natural Language AI</h1>
+        <p class = "content">My cool slogan</p>
+    </div>
+</div>
+<div class = "div1" style = "scroll-margin: 20 vh; scroll-snap-align: start; background-image: linear-gradient(45deg, #00f260, #0575e6); color: #f5f5f7;">
+    <div class = "div2">
+        <h1 class = "content">Natural Language AI</h1>
+        <p class = "content">My cool slogan</p>
+    </div>
+</div>
+<div class = "div1" style = "scroll-margin: 20 vh; scroll-snap-align: start; background-image: linear-gradient(45deg, #f3904f, #3b4371); color: #f5f5f7;">
+    <div class = "div2">
+        <h1 class = "content">Natural Language AI</h1>
+        <p class = "content">My cool slogan</p>
+    </div>
+</div>
+{% endblock %}

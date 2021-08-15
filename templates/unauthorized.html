@@ -1,0 +1,26 @@
+{% extends "base.html" %} 
+
+{% block links %}  
+    <li class="nav-item">
+        <a class="nav-link" style = "color: #ffffff" href="{{url_for('home')}}">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" style = "color: #ffffff" aria-current="page" href="{{url_for('new')}}">Query</a>
+    </li>
+    </li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <h1 class="col-lg-10 offset-lg-1 my-4">Login Required</h1>
+    <div class="col-lg-10 offset-lg-1">
+        To use this webpage, you must login with a valid Google account.
+    </div>  
+    <div class="col-lg-10 offset-lg-1 my-4">
+        <a class="btn btn-outline-dark" href="{{url_for('login')}}" role="button" style="text-transform:none">
+          <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
+          Login with Google
+        </a>
+    </div>
+</div>
+{% endblock %}

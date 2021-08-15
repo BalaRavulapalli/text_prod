@@ -1,0 +1,7 @@
+__pycache__/
+.ipynb_checkpoints/
+.vscode/
+future/
+s2v_old/
+unnecessary/
+s2v_reddit_2015_md.tar.gz

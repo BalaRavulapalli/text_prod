@@ -1,0 +1,20 @@
+{% extends "base.html" %} 
+
+{% block links %}  
+    <li class="nav-item">
+        <a class="nav-link" style = "color: #ffffff" href="{{url_for('home')}}">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" style = "color: #ffffff" aria-current="page" href="{{url_for('new')}}">Query</a>
+    </li>
+    </li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <h1 class="col-lg-10 offset-lg-1 my-4">Oops! An Error Occurred</h1>
+    <div class="col-lg-10 offset-lg-1">
+        Please contact us to resolve this issue.
+    </div>  
+</div>
+{% endblock %}

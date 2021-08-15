@@ -1,0 +1,54 @@
+{% extends "base.html" %} 
+
+{% block links %}  
+    <li class="nav-item">
+        <a class="nav-link" style = "color: #ffffff" href="{{url_for('home')}}">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" style = "color: #a2a7ac" aria-current="page" href="{{url_for('new')}}">Query</a>
+    </li>
+    </li>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <h1 class="col-lg-10 offset-lg-1 my-4">Questions!</h1>
+    <div class="col-lg-10 offset-lg-1">
+        <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  {{ form.content.label }}
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                  {{input_text | safe}}
+                </div>
+              </div>
+            </div>
+        </div>
+        <br>
+            <b>Questions:</b><br>
+            {% for qtype in all_qtypes.keys() %}
+                {% for group in all_qtypes[qtype] %}
+                        <b>
+                            {{qtype}} #{{loop.index}}
+                        </b>
+                        <ul>
+                            {% for point in group %}
+                                {% for value in point.keys() %}
+                                    <li> <em>{{value}}</em>: {{point[value]}}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                {% endfor %}
+            {% endfor %}
+            
+            <hr>
+    </div>  
+    <div class="col-lg-10 offset-lg-1">
+        <a href="{{ url_for('new') }}" class="btn btn-primary">New Query</a>
+    </div>
+    <br>
+</div>
+{% endblock %}
