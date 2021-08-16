@@ -216,6 +216,7 @@ class TF:
     
     def tf_sum(self):
         sents = gensim.summarization.textcleaner.split_sentences(self.text)
+        # print(sents)
         if self.num_sents >= len(sents):
             self.text = sents
         else:
@@ -328,7 +329,7 @@ class TF:
         return final_sents
 
 def rank_dissimilarity(gpt2_sentences):
-    print(gpt2_sentences, 'hi')
+    print(gpt2_sentences)
     dissimilar_final = []
     for question in gpt2_sentences:
         false_sentences_embeddings = BERT_model.encode(question[1])
