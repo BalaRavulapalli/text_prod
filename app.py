@@ -48,7 +48,7 @@ nlp = spacy.load("en_core_web_sm")
 predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/elmo-constituency-parser-2020.02.10.tar.gz")
 GPT2tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 GPT2model = TFGPT2LMHeadModel.from_pretrained("gpt2",pad_token_id=GPT2tokenizer.eos_token_id)
-nltk.download('punkt')
+# nltk.download('punkt')
 print('loaded')
 
 from sentence_transformers import SentenceTransformer, util
@@ -361,23 +361,22 @@ def tfq(results, payload):
     results['True/False']['incorrect'] = [rank[1] for rank in ranked]
 
 # Internal imports
-# from db import init_db_command
-# from user import User
+from db import init_db_command
+from user import User
 
-# with open('client_creds.json', mode = 'r') as jsoncreds:
-#     creds = json.load(jsoncreds)
+with open('client_creds.json', mode = 'r') as jsoncreds:
+    creds = json.load(jsoncreds)
 
-# GOOGLE_CLIENT_ID = creds['web']['client_id']
-# GOOGLE_CLIENT_SECRET = creds['web']['client_secret']
-# GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+GOOGLE_CLIENT_ID = creds['web']['client_id']
+GOOGLE_CLIENT_SECRET = creds['web']['client_secret']
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
-app = Flask(__name__)
 app.config["SECRET_KEY"] = 'TVOC2UFO7W8PJ95AZW42W0U6QV1R49ZQ878CIHFITU8FFNBUGMAPRNHKUO7XFOPBRVWENPMESWE3Y1VA8CAD2Y5QZ1GJJDPV'
-app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lcqw3MbAAAAAPGvlUS_xCDSTw6mB7yLn8wcwj8U"
-app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lcqw3MbAAAAABO2ekkU6KtCQj7O94thjJoOTpKr"
+# app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lcqw3MbAAAAAPGvlUS_xCDSTw6mB7yLn8wcwj8U"
+# app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lcqw3MbAAAAABO2ekkU6KtCQj7O94thjJoOTpKr"
 app.config['ALLOWED_FILE_EXTENSIONS'] = ["pdf", "docx", "txt"]
 app.config['MAX_CONTENT_LENGTH'] = 100*1024*1024
-app.config["TESTING"] = True
+# app.config["TESTING"] = True
 
 # class MultiCheckboxField(SelectMultipleField):  
 #     widget = widgets.ListWidget(prefix_label=False)
@@ -399,108 +398,110 @@ class QuestionsForm(FlaskForm):
     # recaptcha = RecaptchaField()
     submit = SubmitField("Submit")
 
-# def get_google_provider_cfg():
-#     return requests.get(GOOGLE_DISCOVERY_URL).json()
+def get_google_provider_cfg():
+    return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 # User session management setup
 # https://flask-login.readthedocs.io/en/latest
-# login_manager = LoginManager()
-# login_manager.init_app(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 # Naive database setup
-# try:
-#     init_db_command()
-# except sqlite3.OperationalError:
-#     # Assume it's already been created
-#     pass
+try:
+    init_db_command()
+except sqlite3.OperationalError:
+    # Assume it's already been created
+    pass
 
 # # OAuth 2 client setup
-# client = WebApplicationClient(GOOGLE_CLIENT_ID)
+client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 # # Flask-Login helper to retrieve a user from our db
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return User.get(user_id)
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 @app.route('/')
 def home():
-    # if current_user.is_authenticated:
-    #     return render_template('index.html', pic = current_user.profile_pic,
-    #         info = [current_user.name])
-    # else:
-        return render_template('index.html', name = False, info = [])
+    if current_user.is_authenticated:
+        return render_template('index.html', pic = current_user.profile_pic,
+            info = [current_user.name])
+    else:
+        return render_template('index.html', 
+        # name = False, 
+        info = [])
 
 
-# @app.route("/login")
-# def login():
-#     # Find out what URL to hit for Google login
-#     google_provider_cfg = get_google_provider_cfg()
-#     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+@app.route("/login")
+def login():
+    # Find out what URL to hit for Google login
+    google_provider_cfg = get_google_provider_cfg()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
-#     # Use library to construct the request for Google login and provide
-#     # scopes that let you retrieve user's profile from Google
-#     request_uri = client.prepare_request_uri(authorization_endpoint, redirect_uri=request.base_url + "/callback",
-#         scope=["openid", "email", "profile"])
-#     return redirect(request_uri)
+    # Use library to construct the request for Google login and provide
+    # scopes that let you retrieve user's profile from Google
+    request_uri = client.prepare_request_uri(authorization_endpoint, redirect_uri=request.base_url + "/callback",
+        scope=["openid", "email", "profile"])
+    return redirect(request_uri)
 
-# @app.route("/login/callback")
-# def callback():
-#     # Get authorization code Google sent back to you
-#     code = request.args.get("code")
-#     # Find out what URL to hit to get tokens that allow you to ask for
-#     # things on behalf of a user
-#     google_provider_cfg = get_google_provider_cfg()
-#     token_endpoint = google_provider_cfg["token_endpoint"]
-#     # Prepare and send a request to get tokens! Yay tokens!
-#     token_url, headers, body = client.prepare_token_request(token_endpoint, authorization_response=request.url, 
-#         redirect_url=request.base_url, code=code)
-#     token_response = requests.post(token_url, headers=headers, data=body, 
-#         auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET))
+@app.route("/login/callback")
+def callback():
+    # Get authorization code Google sent back to you
+    code = request.args.get("code")
+    # Find out what URL to hit to get tokens that allow you to ask for
+    # things on behalf of a user
+    google_provider_cfg = get_google_provider_cfg()
+    token_endpoint = google_provider_cfg["token_endpoint"]
+    # Prepare and send a request to get tokens! Yay tokens!
+    token_url, headers, body = client.prepare_token_request(token_endpoint, authorization_response=request.url, 
+        redirect_url=request.base_url, code=code)
+    token_response = requests.post(token_url, headers=headers, data=body, 
+        auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET))
 
-#     # Parse the tokens!
-#     client.parse_request_body_response(json.dumps(token_response.json()))
-#     # Now that you have tokens (yay) let's find and hit the URL
-#     # from Google that gives you the user's profile information,
-#     # including their Google profile image and email
-#     userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
-#     uri, headers, body = client.add_token(userinfo_endpoint)
-#     userinfo_response = requests.get(uri, headers=headers, data=body)
-#     # You want to make sure their email is verified.
-#     # The user authenticated with Google, authorized your
-#     # app, and now you've verified their email through Google!
-#     if userinfo_response.json().get("email_verified"):
-#         unique_id = userinfo_response.json()["sub"]
-#         users_email = userinfo_response.json()["email"]
-#         picture = userinfo_response.json()["picture"]
-#         users_name = userinfo_response.json()["given_name"]
-#     else:
-#         return "User email not available or not verified by Google.", 400
+    # Parse the tokens!
+    client.parse_request_body_response(json.dumps(token_response.json()))
+    # Now that you have tokens (yay) let's find and hit the URL
+    # from Google that gives you the user's profile information,
+    # including their Google profile image and email
+    userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    userinfo_response = requests.get(uri, headers=headers, data=body)
+    # You want to make sure their email is verified.
+    # The user authenticated with Google, authorized your
+    # app, and now you've verified their email through Google!
+    if userinfo_response.json().get("email_verified"):
+        unique_id = userinfo_response.json()["sub"]
+        users_email = userinfo_response.json()["email"]
+        picture = userinfo_response.json()["picture"]
+        users_name = userinfo_response.json()["given_name"]
+    else:
+        return "User email not available or not verified by Google.", 400
 
-#     # Create a user in your db with the information provided
-#     # by Google
-#     user = User(
-#         id_=unique_id, name=users_name, email=users_email, profile_pic=picture
-#     )
+    # Create a user in your db with the information provided
+    # by Google
+    user = User(
+        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
+    )
 
-#     # Doesn't exist? Add it to the database.
-#     if not User.get(unique_id):
-#         User.create(unique_id, users_name, users_email, picture)
+    # Doesn't exist? Add it to the database.
+    if not User.get(unique_id):
+        User.create(unique_id, users_name, users_email, picture)
 
-#     # Begin user session by logging the user in
-#     login_user(user)
+    # Begin user session by logging the user in
+    login_user(user)
 
-#     # Send user back to homepage
-#     return redirect(url_for("home"))
+    # Send user back to homepage
+    return redirect(url_for("home"))
 
-# @app.route("/logout")
-# # @login_required 
-# def logout():
-#     logout_user()
-#     return redirect(url_for("home"))
+@app.route("/logout")
+@login_required 
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
 
 
 @app.route('/query/new', methods = ['GET', 'POST'])
-# @login_required
+@login_required
 def new():
     # global form
     form = QuestionsForm()
@@ -561,15 +562,36 @@ def new():
                 # if form.content.data:
                 #     pass
                 # print('rendering')
+                # print(data_list)
+                empty = True
+                for qtype in data_list:
+                    if data_list[qtype]:
+                        empty = False
+                if empty:
+                    data_list = {}
+                # print('DataList')
+                print(data_list)
+                # print(data_list)
+                # print(payload['input_text'])
+                url = "https://script.google.com/macros/s/AKfycbx4_vzLNzjsK_3jwveHP1ismWjxVtHgLkuUjINcdpUTahhhP1RY1t_dy3npZmNJm79l6A/exec"
+                formjson = {'data_list': data_list, 'email': current_user.email}
+                # print(current_user.email)
+                gform = requests.post(url = url, json = formjson)
+                # print(gform.text)
                 form = QuestionsForm()
+                gform = gform.json()
+                copyurl = re.sub(r"edit$", "copy", gform['link'])
                 return render_template('questions.html', input_text = payload['input_text'],
-                                    all_qtypes = data_list,
-                                    form = form)
+                                    html = gform['html'],
+                                    copy = copyurl,
+                                    form = form, pic = current_user.profile_pic,
+            info = [current_user.name])
             except:
                 form = QuestionsForm()
             return render_template('questions.html', input_text = '',
                                     all_qtypes = {},
-                                    form = form)
+                                    form = form, pic = current_user.profile_pic,
+            info = [current_user.name])
             # print(results)
             # session['payload']=payload
             # session['results'] = results
@@ -584,9 +606,8 @@ def new():
             #     form.content.errors.append('Either the Content box or the File Upload must have data.')
         else:
             print('all is not correct')
-    return render_template('query.html', form = form)
-    # pic = current_user.profile_pic,
-    #         info = [current_user.name])
+    return render_template('query.html', form = form,  pic = current_user.profile_pic,
+            info = [current_user.name]) 
 
 # @app.route('/query/questions', methods = ['GET', 'POST'])
 # @login_required
@@ -661,9 +682,9 @@ def server(error):
 @app.errorhandler(413)
 def server(error):
     return render_template('size.html')
-
+print('reading to run')
 if __name__ == '__main__':
+    pass
     app.run(
-        host="0.0.0.0"
-        # ssl_context="adhoc",
+        ssl_context="adhoc"
         )

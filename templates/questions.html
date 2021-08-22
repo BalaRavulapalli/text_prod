@@ -7,7 +7,7 @@ Questions
 .row{
     --bs-gutter-x: 0rem;
 }
-.btn.btn-primary{
+.btn{
     margin-bottom: 1rem;
   }
 {% endblock %}
@@ -40,6 +40,8 @@ Questions
             </div>
         </div>
         <br>
+        <iframe srcdoc = "{{html}}" height= "600em" width="800em" title= "Google Form" style= "border: none;"></iframe>
+        {#
             <b>Questions:</b><br>
             {% for qtype in all_qtypes.keys() %}
                 {% for group in all_qtypes[qtype] %}
@@ -55,11 +57,13 @@ Questions
                         </ul>
                 {% endfor %}
             {% endfor %}
+                    #}
             
             <hr>
     </div>  
     <div class="col-lg-10 offset-lg-1">
-        <a href="{{ url_for('new') }}" class="btn btn-primary">New Query</a>
+        <a href="{{copy}}" class="btn btn-primary">Copy Google Form</a>
+        <a href="{{ url_for('new') }}" class="btn btn-success">New Query</a>
     </div>
     <br>
 </div>
