@@ -6,6 +6,7 @@ from typing import List
 from spacy.tokens import Doc, Span
 from coreference_resolution.utils import load_models, print_clusters, print_comparison
 import random
+import numpy as np
 
 
 def core_logic_part(document: Doc, coref: List[int], resolved: List[str], mention_span: Span):
@@ -74,7 +75,20 @@ class BalaQG:
         context = input_dict['input_text']
         max_length = input_dict['max_questions']
         with torch.no_grad():
+            softer = torch.nn.Softmax(dim = 0)
             sents = nltk.sent_tokenize(context)
+            specific = []
+            for i, sent in enumerate(sents):
+                sample = self.filter_toker(sent, return_tensors = "pt", add_special_tokens=True, truncation=True,  max_length=512)
+                logits= self.filter_model(**sample).logits.squeeze()
+                softed = softer(logits)
+                max = np.argmax(softed)
+                if (max == 1) and ('?' not in sent):
+                    specific.append([sent, softed[1], i])
+            specific.sort(reverse = True, key = lambda x: x[1])
+            selected_specific = specific[:max_length]
+            selected_specific.sort(key = lambda x: x [2])
+            sents = selected_specific
             i = 0
             sents2 = []
             
@@ -86,21 +100,25 @@ class BalaQG:
             #     i +=2
                         
             while i <= (len(sents) - 1):
-                sents2.append(' '.join(sents[i:i+3]))
-                i +=3
-            text_mapping = {}
-            sent2_count = []
-            previous = 0
-            tempLen = 0
-            for sentGroup in sents2:
-                sent2_count.append(previous)
-                tempLen = len(nltk.sent_tokenize(sentGroup))
-                previous += tempLen
+                location = sents[i][2]
+                temp_group = sents[i:i+2]
+                sents_temp = [x[0] for x in temp_group]
+                sents2.append([' '.join(sents_temp), location])
+                i +=2
+            # text_mapping = {}
+            # sent2_count = []
+            # previous = 0
+            # tempLen = 0
+            # for sentGroup in sents2:
+            #     sent2_count.append(previous)
+            #     tempLen = len(nltk.sent_tokenize(sentGroup))
+            #     previous += tempLen
             coref_text = improved_replace_corefs(self.nlp(context), self.predictor.predict(context)['clusters'])
             coref_sents = nltk.sent_tokenize(coref_text)
-            assert len(sents2) == len(sent2_count)
+            # assert len(sents2) == len(sent2_count)
             answer_grouping = []
-            for outerI, text in enumerate(sents2):
+            for outerI, group in enumerate(sents2):
+                text, location = group
                 if len(answer_grouping) < max_length:
                     tokered = self.c_a_toker(f"context: {text}", return_tensors="pt")
                     output1 = self.c_a_toker.decode(self.c_a_model.generate(**tokered)[0])
@@ -117,12 +135,12 @@ class BalaQG:
                     for kept in output1:
                         for i, sent in enumerate(textSents):
                             if kept in sent:
-                                print('coref', len(coref_sents))
-                                print('sent2_count', len(sent2_count))
-                                print('outerI', outerI)
-                                print('i', i)
-                                print('sent2_count[outerI]', sent2_count[outerI])
-                                answer_grouping.append((coref_sents[sent2_count[outerI] + i], kept))
+                                # print('coref', len(coref_sents))
+                                # print('sent2_count', len(sent2_count))
+                                # print('outerI', outerI)
+                                # print('i', i)
+                                # print('sent2_count[outerI]', sent2_count[outerI])
+                                answer_grouping.append((coref_sents[location + i], kept))
                                 break
             while len(answer_grouping) > max_length:
                 answer_grouping.pop(random.choice(range(len(answer_grouping))))
