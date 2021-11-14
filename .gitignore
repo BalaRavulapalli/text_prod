@@ -5,3 +5,8 @@ future/
 s2v_old/
 unnecessary/
 s2v_reddit_2015_md.tar.gz
+*.zip
+coreference_resolution/
+t5smallcav12/
+t5smallqano/
+distilbertfilter/
