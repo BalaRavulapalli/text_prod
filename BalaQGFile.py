@@ -142,14 +142,16 @@ class BalaQG:
                                 # print('sent2_count[outerI]', sent2_count[outerI])
                                 answer_grouping.append((coref_sents[location + i], kept))
                                 break
-            while len(answer_grouping) > max_length:
-                answer_grouping.pop(random.choice(range(len(answer_grouping))))
+            # while len(answer_grouping) > max_length:
+            #     answer_grouping.pop(random.choice(range(len(answer_grouping))))
 
             question_grouping = []
             for sentence, answer in answer_grouping:
-                result = self.c_q_toker.decode(self.c_q_model.generate(**self.c_q_toker(f'context: {sentence} answer: {answer} ', return_tensors = "pt"))[0])
-                question = result.split('question: ')[1].split('</s>')[0]
-                question_grouping.append([question, answer, sentence])
+                if len(question_grouping) < max_length:
+                    result = self.c_q_toker.decode(self.c_q_model.generate(**self.c_q_toker(f'context: {sentence} answer: {answer} ', return_tensors = "pt"))[0])
+                    question = result.split('question: ')[1].split('</s>')[0]
+                    if (answer.lower() not in question.lower()):
+                        question_grouping.append([question, answer, sentence])
             final_grouping = []
             for question, answer, sentence in question_grouping:
                 input_txt = f"question: {question} answer: {answer}"

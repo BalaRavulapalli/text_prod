@@ -759,9 +759,9 @@ def unauthorized(error):
 def largefile(error):
     return render_template('unauthorized.html')
 
-# @app.errorhandler(500)
-# def server(error):
-#     return render_template('error.html')
+@app.errorhandler(500)
+def server(error):
+    return render_template('balaerror.html')
 
 
 @app.errorhandler(502)
