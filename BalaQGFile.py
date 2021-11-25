@@ -58,7 +58,7 @@ class BalaQG:
     def __init__(self):
         predictor, nlp = load_models()
         self.c_a_model = ElectraForQuestionAnswering.from_pretrained("./electraAextraction18381/checkpoint-18381/")
-        self.c_a_toker = ElectraTokenizerFast.from_pretrained("./electraAextraction18381/checkpoint-18381/")
+        self.c_a_toker = ElectraTokenizerFast.from_pretrained("google/electra-base-discriminator")
         self.c_q_model = T5ForConditionalGeneration.from_pretrained("ramsrigouthamg/t5_squad_v1")
         self.c_q_model.config.max_length = 512
         self.c_q_toker = T5Tokenizer.from_pretrained("ramsrigouthamg/t5_squad_v1")
@@ -133,7 +133,7 @@ class BalaQG:
                 scores.sort(key = lambda x: x[1], reverse = True)
                 starttok = scores[0][0][0]
                 endtok = scores[0][0][1]
-                offsets = self.c_a_toker(group, return_offsets_mapping=True)['offset_mapping']
+                offsets = self.c_a_toker(text, return_offsets_mapping=True)['offset_mapping']
                 startOffset = offsets[starttok][0]
                 endOffset = offsets[endtok][0]
                 answer = text[startOffset:endOffset]
