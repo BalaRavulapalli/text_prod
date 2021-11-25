@@ -640,6 +640,7 @@ def new():
             # print(data_list)
             # print(data_list)
             # print(payload['input_text'])
+            
             url = "https://script.google.com/macros/s/AKfycbzducEgq-8BPARjTx6djntN8bOenVaq9X8Ku_5z51krxhbQ4OJ26lam7k3sNQKJuqXD/exec"
             formjson = {'data_list': data_list, 'email': current_user.email}
             # print(current_user.email)
@@ -647,7 +648,9 @@ def new():
             # print('form_json', formjson)
             # try:
             logging.info('here2')
+            beginRequest = datetime.datetime.now()
             gform = requests.post(url=url, json=formjson)
+            logging.error('Request ' + str(datetime.datetime.now()-beginRequest))
             logging.info('2.1')
             gform.raise_for_status()
             logging.info('here3')

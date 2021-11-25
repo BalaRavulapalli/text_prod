@@ -7,6 +7,11 @@ from spacy.tokens import Doc, Span
 from coreference_resolution.utils import load_models, print_clusters, print_comparison
 import random
 import numpy as np
+from fastT5 import get_onnx_model,get_onnx_runtime_sessions,OnnxT5
+from pathlib import Path
+import os
+import datetime
+import logging
 
 
 def core_logic_part(document: Doc, coref: List[int], resolved: List[str], mention_span: Span):
@@ -56,12 +61,21 @@ def improved_replace_corefs(document, clusters):
 
 class BalaQG:
     def __init__(self):
+        trained_model_path = './onnxt5/t5_squad_v1/models/'
+        encoder_path = os.path.join(trained_model_path,f"t5_squad_v1-encoder-quantized.onnx")
+        decoder_path = os.path.join(trained_model_path,f"t5_squad_v1-decoder-quantized.onnx")
+        init_decoder_path = os.path.join(trained_model_path,f"t5_squad_v1-init-decoder-quantized.onnx")
+        model_paths = encoder_path, decoder_path, init_decoder_path
+        model_sessions = get_onnx_runtime_sessions(model_paths)
+        c_q_model = OnnxT5(trained_model_path, model_sessions)
+
+        c_q_tokenizer = AutoTokenizer.from_pretrained(trained_model_path)
         predictor, nlp = load_models()
         self.c_a_model = ElectraForQuestionAnswering.from_pretrained("./electraAextraction18381/checkpoint-18381/")
         self.c_a_toker = ElectraTokenizerFast.from_pretrained("google/electra-base-discriminator")
-        self.c_q_model = T5ForConditionalGeneration.from_pretrained("ramsrigouthamg/t5_squad_v1")
+        self.c_q_model = c_q_model
         self.c_q_model.config.max_length = 512
-        self.c_q_toker = T5Tokenizer.from_pretrained("ramsrigouthamg/t5_squad_v1")
+        self.c_q_toker = c_q_tokenizer
         self.a_o_model = GPT2LMHeadModel.from_pretrained("t5smallqano/checkpoint-10544/")
         self.a_o_model.config.max_length = 128
         self.a_o_toker = GPT2Tokenizer.from_pretrained("./t5smallqano/checkpoint-10544/", eos_token='<|endoftext|>')
@@ -71,9 +85,11 @@ class BalaQG:
         self.nlp = nlp
 
     def predict_mcq(self, input_dict):
+        logging.basicConfig(filename = 'example.log', level  = logging.ERROR)
         context = input_dict['input_text']
         max_length = input_dict['max_questions']
         with torch.no_grad():
+            beginFilter = datetime.datetime.now()
             softer = torch.nn.Softmax(dim = 0)
             sents = nltk.sent_tokenize(context)
             specific = []
@@ -88,6 +104,7 @@ class BalaQG:
             selected_specific = specific[:max_length]
             selected_specific.sort(key = lambda x: x [2])
             sents = selected_specific
+            logging.error('filtering ' + str(datetime.datetime.now()-beginFilter))
             # i = 0
             # sents2 = []
             
@@ -112,17 +129,20 @@ class BalaQG:
             # #     sent2_count.append(previous)
             # #     tempLen = len(nltk.sent_tokenize(sentGroup))
             # #     previous += tempLen
+            beginCoref = datetime.datetime.now()
             coref_text = improved_replace_corefs(self.nlp(context), self.predictor.predict(context)['clusters'])
             coref_sents = nltk.sent_tokenize(coref_text)
+            logging.error('coref ' + str(datetime.datetime.now()-beginCoref))
             # assert len(sents2) == len(sent2_count)
             answer_grouping = []
             # softer = torch.nn.Softmax(dim=0)
+            beginAextraction = datetime.datetime.now()
             for group in sents:
                 text = group[0]
                 # if len(answer_grouping) < max_length:
-                with torch.no_grad():
-                    tokered = self.c_a_toker(text, return_tensors="pt", add_special_tokens=True, truncation=True,  max_length=512, return_token_type_ids=True)
-                    output = self.c_a_model(**tokered)
+                # with torch.no_grad():
+                tokered = self.c_a_toker(text, return_tensors="pt", add_special_tokens=True, truncation=True,  max_length=512, return_token_type_ids=True)
+                output = self.c_a_model(**tokered)
                 starts = softer(output.start_logits.cpu()[0]).tolist()
                 ends = softer(output.end_logits.cpu()[0]).tolist()
                 scores = []
@@ -160,19 +180,22 @@ class BalaQG:
                 #             break
             # while len(answer_grouping) > max_length:
             #     answer_grouping.pop(random.choice(range(len(answer_grouping))))
-
+            logging.error('aExtraction ' + str(datetime.datetime.now()-beginAextraction))
+            beginQG = datetime.datetime.now()
             question_grouping = []
             for sentence, answer in answer_grouping:
                 if len(question_grouping) < max_length:
-                    result = self.c_q_toker.decode(self.c_q_model.generate(**self.c_q_toker(f'context: {sentence} answer: {answer} ', return_tensors = "pt"))[0])
+                    result = self.c_q_toker.decode(self.c_q_model.generate(**self.c_q_toker(f'context: {sentence} answer: {answer} ', return_tensors = "pt"), num_beams = 1)[0])
                     question = result.split('question: ')[1].split('</s>')[0]
                     if (answer.lower() not in question.lower()):
                         question_grouping.append([question, answer, sentence])
+            logging.error('QG ' + str(datetime.datetime.now()-beginQG))
+            beginDistractor = datetime.datetime.now()
             final_grouping = []
             for question, answer, sentence in question_grouping:
                 input_txt = f"question: {question} answer: {answer}"
                 encoded = self.a_o_toker.encode(input_txt, return_tensors="pt")
-                output = self.a_o_toker.decode(self.a_o_model.generate(input_ids = encoded)[0], clean_up_tokenization_spaces=True)
+                output = self.a_o_toker.decode(self.a_o_model.generate(input_ids = encoded, num_beams = 1)[0], clean_up_tokenization_spaces=True)
                 print(output)
                 options = []
                 split1 = output.split('option1: ')[1]
@@ -184,6 +207,7 @@ class BalaQG:
                 split4 = split3[1].split(" <|endoftext|>")
                 options.append(split4[0])
                 final_grouping.append([question, answer, options, sentence])
+            logging.error('Distractor ' + str(datetime.datetime.now()-beginDistractor))
             func_output = {'Multiple Choice': {'questions': []}}   
             for item in final_grouping:
                 answer = item[1].strip()
