@@ -76,3 +76,32 @@ Traceback (most recent call last):
   File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/allennlp/nn/util.py", line 2049, in masked_topk
     fill_value, _ = top_indices.max(dim=1, keepdim=True)
 IndexError: max(): Expected reduction dim 1 to have non-zero size.
+ERROR:app:Exception on /query/new [POST]
+Traceback (most recent call last):
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask_login/utils.py", line 272, in decorated_view
+    return func(*args, **kwargs)
+  File "/datadrive/qgv1/text_prod/app.py", line 601, in new
+    mcq(myqg, results, payload)
+  File "/datadrive/qgv1/text_prod/app.py", line 82, in mcq
+    output = qg.predict_mcq(
+  File "/datadrive/qgv1/text_prod/BalaQGFile.py", line 136, in predict_mcq
+    offsets = self.c_a_toker(group, return_offsets_mapping=True)['offset_mapping']
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/transformers/tokenization_utils_base.py", line 2288, in __call__
+    return self.batch_encode_plus(
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/transformers/tokenization_utils_base.py", line 2473, in batch_encode_plus
+    return self._batch_encode_plus(
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/transformers/tokenization_utils.py", line 530, in _batch_encode_plus
+    raise NotImplementedError(
+NotImplementedError: return_offset_mapping is not available when using Python tokenizers.To use this feature, change your tokenizer to one deriving from transformers.PreTrainedTokenizerFast.
