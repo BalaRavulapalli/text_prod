@@ -427,7 +427,7 @@ app.config['MAX_CONTENT_LENGTH'] = 100*1024*1024
 class QuestionsForm(FlaskForm):
     content = TextAreaField("Content",
                             validators=[InputRequired("Input is required."), DataRequired("Data is required."),
-                                        Length(min=5, message="Input must be at least 5 characters long")]
+                                        Length(min=11, message="Input must be longer than 10 characters")]
                             )
     # checkbox = MultiCheckboxField("Question Types", choices = [('Multiple Choice', 'Multiple Choice'), ('True/False', 'True/False'), ('Fill in the Blanks', 'Fill in the Blanks'), ('Yes/No', 'Yes/No'), ('Match Definitions', 'Match Definitions')], validators =
     #     [ InputRequired("You must select  at least one option."), DataRequired("Data is required.")])
@@ -597,14 +597,18 @@ def new():
             # print('after')
             if 'Multiple Choice' in payload['question_types']:
                 logging.info('before mcq')
-                mcq(myqg, results, payload)
+                if len(payload['input_text']) > 10:
+                    mcq(myqg, results, payload)
                 logging.info('after mcq', results)
             if 'Yes/No' in payload['question_types']:
-                boolq(myqe, results, payload)
+                if len(payload['input_text']) > 10:
+                    boolq(myqe, results, payload)
             if 'Fill in the Blanks' in payload['question_types']:
-                fitb(results, payload)
+                if len(payload['input_text']) > 10:
+                    fitb(results, payload)
             if 'True/False' in payload['question_types']:
-                tfq(results, payload)
+                if len(payload['input_text']) > 10:
+                    tfq(results, payload)
             # try:
             data_list = {}
             # print(payload)

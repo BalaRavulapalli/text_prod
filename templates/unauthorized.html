@@ -2,27 +2,42 @@
 {% block title %}
 Unauthorized
 {% endblock %}
-{% block links %}  
-    <li class="nav-item">
-        <a class="nav-link" style = "color: #ffffff" href="{{url_for('home')}}">Home</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" style = "color: #ffffff" aria-current="page" href="{{url_for('new')}}">Query</a>
-    </li>
-    </li>
-{% endblock %}
 
 {% block content %}
-<div class="row">
-    <h1 class="col-lg-10 offset-lg-1 my-4">Login Required</h1>
-    <div class="col-lg-10 offset-lg-1">
-        To use this webpage, you must login with a valid Google account.
-    </div>  
-    <div class="col-lg-10 offset-lg-1 my-4">
-        <a class="btn btn-outline-dark" href="{{url_for('login')}}" role="button" style="text-transform:none">
-          <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
-          Login with Google
-        </a>
-    </div>
-</div>
+
+
+ <!-- CONTENT -->
+ <section>
+    <div class="container d-flex flex-column">
+      <div class="row align-items-center justify-content-center gx-0 min-vh-100">
+        <div class="col-8 col-md-6 col-lg-7 offset-md-1 order-md-2 mt-auto mt-md-0 pt-8 pb-4 py-md-11">
+
+          <!-- Image -->
+          <img src="{{url_for('static', filename = './assets/img/illustrations/illustration-1.png')}}" alt="..." class="img-fluid">
+
+        </div>
+        <div class="col-12 col-md-5 col-lg-4 order-md-1 mb-auto mb-md-0 pb-8 py-md-11">
+          
+          <!-- Heading -->
+          <h1 class="display-3 fw-bold text-center">
+            Login Required
+          </h1>
+
+          <!-- Text -->
+          <p class="mb-5 text-center text-muted">
+            To use this webpage, you must login with a valid Google account.
+          </p>
+
+          <!-- Link -->
+          <div class="text-center">
+            <a class="btn btn-outline-dark w-75 mt-3 lift" style = "display: block;margin-left: auto; margin-right: auto;" href="{{url_for('login')}}" role="button" style="text-transform:none">
+                <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
+                Login with Google
+              </a>
+          </div>
+
+        </div>
+      </div> <!-- / .row -->
+    </div> <!-- / .container -->
+  </section>
 {% endblock %}

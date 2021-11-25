@@ -1,3 +1,4 @@
+
 {% extends "base.html" %} 
 {% block title %}
 Questions
@@ -12,15 +13,6 @@ Questions
   }
 {% endblock %}
 
-{% block links %}  
-    <li class="nav-item">
-        <a class="nav-link" style = "color: #ffffff" href="{{url_for('home')}}">Home</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" style = "color: #a2a7ac" aria-current="page" href="{{url_for('new')}}">Query</a>
-    </li>
-    </li>
-{% endblock %}
 {% block content %}
 <div class="row">
     <h1 class="col-lg-10 offset-lg-1 my-4">Questions!</h1>
