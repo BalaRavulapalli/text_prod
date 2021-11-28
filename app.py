@@ -269,7 +269,7 @@ class TF:
     def tf(self):
         final_sents = []
         for my_item in self.text:
-            item = my_item.rstrip('?:!.,;')
+            item = my_item.rstrip('?:!.,;"')
             parser_output = predictor.predict(sentence=item)
             tree_string = parser_output['trees']
             tree = Tree.fromstring(tree_string)
@@ -298,27 +298,28 @@ class TF:
             if last_P:
                 last_P_flattened = get_flattened(last_P)
             else:
-                return []
+                # return []
+                continue
 
             def get_termination_portion(main_string, sub_string):
 
-                orig = tokenize.word_tokenize(main_string)
-                mini = tokenize.word_tokenize(sub_string)
-                orig.reverse()
-                mini.reverse()
-                rorig = iter(orig)
-                rmini = iter(mini)
-                brackets = []
-                for i, x in enumerate(rmini):
-                    y = next(rorig)
-                    if y in ['(', ')']:
-                        brackets.append(((i + len(brackets)), y))
-                        y = next(rorig)
+                # orig = tokenize.word_tokenize(main_string)
+                # mini = tokenize.word_tokenize(sub_string)
+                # orig.reverse()
+                # mini.reverse()
+                # rorig = iter(orig)
+                # rmini = iter(mini)
+                # brackets = []
+                # for i, x in enumerate(rmini):
+                #     y = next(rorig)
+                #     if y in ['(', ')']:
+                #         brackets.append(((i + len(brackets)), y))
+                #         y = next(rorig)
 
-                for i, x in brackets:
-                    mini.insert(i, x)
-                orig.reverse()
-                mini.reverse()
+                # for i, x in brackets:
+                #     mini.insert(i, x)
+                # orig.reverse()
+                # mini.reverse()
 
                 combined_sub_string = ''.join(mini)
                 print(combined_sub_string)
