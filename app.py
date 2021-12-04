@@ -6,7 +6,7 @@ from db import init_db_command
 from transformers.file_utils import TF_CAUSAL_LM_SAMPLE
 from BalaQGFile import BalaQG
 import pickle
-import gensim
+# import gensim
 from transformers import TFGPT2LMHeadModel, GPT2Tokenizer
 import tensorflow as tf
 from nltk.tree import Tree
@@ -26,7 +26,7 @@ import re
 import string
 import copy
 from collections import OrderedDict
-from Questgen import main
+# from Questgen import main
 import json
 import os
 import sqlite3
@@ -47,22 +47,23 @@ import nltk
 nltk.download('stopwords')
 nltk.download('wordnet')
 nltk.download('punkt')
+from concurrent.futures import ThreadPoolExecutor as Executor
 
 import logging
 logging.basicConfig(filename = 'example.log', level  = logging.ERROR)
 # startmodel load
 print('loading')
-nlp = spacy.load("en_core_web_sm")
+# nlp = spacy.load("en_core_web_sm")
 predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/elmo-constituency-parser-2020.02.10.tar.gz")
-GPT2tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-GPT2model = TFGPT2LMHeadModel.from_pretrained("gpt2",pad_token_id=GPT2tokenizer.eos_token_id)
+# GPT2tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+# GPT2model = TFGPT2LMHeadModel.from_pretrained("gpt2",pad_token_id=GPT2tokenizer.eos_token_id)
 print('loaded')
 
 from sentence_transformers import SentenceTransformer, util
 import scipy
 BERT_model = SentenceTransformer('distilbert-base-nli-stsb-mean-tokens')
 qe = 'fds'
-qe= main.BoolQGen()
+# qe= main.BoolQGen()
 
 # end modle load
 
@@ -77,10 +78,10 @@ def copyer(qg, qe):
     return qg2, qe2
 
 
-def mcq(qg, results, payload):
+def mcq(qg, results, payload,  selected_specific, coref_sents):
     # try:
     output = qg.predict_mcq(
-        {'input_text': payload['input_text'], 'max_questions': payload['max_questions']['Multiple Choice']})
+        {'input_text': payload['input_text'], 'max_questions': payload['max_questions']['Multiple Choice']},  selected_specific, coref_sents)
     # print(output)
     # except Exception as e:
     # with open('error.txt', mode = 'w') as myFile:
@@ -100,48 +101,49 @@ def mcq(qg, results, payload):
         # pass
 
 
-def boolq(qe, results, payload):
-    results['Yes/No']['questions'] = []
-    results['Yes/No']['answers'] = []
-    output = qe.predict_boolq(
-        {'input_text': payload['input_text'], 'max_questions': payload['max_questions']['Yes/No']})
-    # print('count', payload['max_questions']['Yes/No'])
-    filtered = []
-    used = []
-    for i, q in enumerate(output['Boolean Questions']):
-        if q not in used:
-            filtered.append(i)
-        used.append(q)
-    filtered_dict = {'questions': [output['Boolean Questions'][i]
-                                   for i in filtered], 'answers': [output['Answer'] for i in filtered]}
-    if payload['max_questions']['Yes/No'] < len(filtered_dict['questions']):
-        sampled = [(filtered_dict['questions'][i], filtered_dict['answers'][i]) for i in sorted(
-            random.sample(range(len(filtered_dict['questions'])), payload['max_questions']['Yes/No']))]
-    else:
-        sampled = zip(filtered_dict['questions'], filtered_dict['answers'])
-    sampled = list(sampled)
-    sampled_dict = {'questions': [sample[0] for sample in sampled], 'answers': [
-        sample[1] for sample in sampled]}
-    # try:
-    results['Yes/No']['questions'] = sampled_dict['questions']
-    results['Yes/No']['answers'] = sampled_dict['answers']
+# def boolq(qe, results, payload):
+#     results['Yes/No']['questions'] = []
+#     results['Yes/No']['answers'] = []
+#     output = qe.predict_boolq(
+#         {'input_text': payload['input_text'], 'max_questions': payload['max_questions']['Yes/No']})
+#     # print('count', payload['max_questions']['Yes/No'])
+#     filtered = []
+#     used = []
+#     for i, q in enumerate(output['Boolean Questions']):
+#         if q not in used:
+#             filtered.append(i)
+#         used.append(q)
+#     filtered_dict = {'questions': [output['Boolean Questions'][i]
+#                                    for i in filtered], 'answers': [output['Answer'] for i in filtered]}
+#     if payload['max_questions']['Yes/No'] < len(filtered_dict['questions']):
+#         sampled = [(filtered_dict['questions'][i], filtered_dict['answers'][i]) for i in sorted(
+#             random.sample(range(len(filtered_dict['questions'])), payload['max_questions']['Yes/No']))]
+#     else:
+#         sampled = zip(filtered_dict['questions'], filtered_dict['answers'])
+#     sampled = list(sampled)
+#     sampled_dict = {'questions': [sample[0] for sample in sampled], 'answers': [
+#         sample[1] for sample in sampled]}
+#     # try:
+#     results['Yes/No']['questions'] = sampled_dict['questions']
+#     results['Yes/No']['answers'] = sampled_dict['answers']
     # except:
     # pass
 
 
 class FB:
-    def __init__(self, text):
+    def __init__(self, text, necessary_coref):
         self.text = text
+        self.necessary_coref= necessary_coref
 
     def fb(self, sent_num=10, pos={'VERB', 'ADJ', 'NOUN', 'NUM', 'PROPN'}):
         # https://universaldependencies.org/u/pos/
-        def tokenize_sentences(text):
-            sentences = sent_tokenize(text)
-            sentences = [sentence.strip()
-                         for sentence in sentences if len(sentence) > 20]
-            return sentences
+        # def tokenize_sentences(text):
+        #     sentences = sent_tokenize(text)
+        #     sentences = [sentence.strip()
+        #                  for sentence in sentences if len(sentence) > 20]
+        #     return sentences
 
-        sentences = tokenize_sentences(self.text)
+        # sentences = tokenize_sentences(self.text)
 
         def get_keywords(text, pos):
             out = []
@@ -167,7 +169,7 @@ class FB:
             return out
 
         keywords_list = get_keywords(text=self.text, pos=pos)
-
+        logging.error('keywords len ' + str(len(keywords_list)))
         def get_sentences_for_keyword(keywords, sentences):
             keyword_processor = KeywordProcessor()
             keyword_sentences = OrderedDict({})
@@ -186,8 +188,8 @@ class FB:
             return keyword_sentences
 
         keyword_sentence_mapping = get_sentences_for_keyword(
-            keywords_list, sentences)
-
+            keywords_list, self.necessary_coref)
+        # logging.error('keyword sentence mapping' + str(keyword_sentence_mapping))
         def get_fill_in_the_blanks(sentence_mapping):
             out = OrderedDict({})
             blank_sentences = []
@@ -196,21 +198,18 @@ class FB:
             for key in sentence_mapping:
                 if len(sentence_mapping[key]) > 0:
                     sents = sentence_mapping[key]
-                    sent = False
-                    for x in sents:
-                        if x not in processed:
-                            sent = x
-                            break
-                    if sent != False:
-                        insensitive_sent = re.compile(
-                            re.escape(key), re.IGNORECASE)
-                        no_of_replacements = len(re.findall(
-                            re.escape(key), sent, re.IGNORECASE))
-                        line = insensitive_sent.sub(' _________ ', sent)
-                        if no_of_replacements < 2:
-                            blank_sentences.append(line)
-                            processed.append(sent)
-                            keys.append(key)
+                    for sent in sents:
+                        if sent not in processed:
+                            insensitive_sent = re.compile(
+                                re.escape(key), re.IGNORECASE)
+                            no_of_replacements = len(re.findall(
+                                re.escape(key), sent, re.IGNORECASE))
+                            line = insensitive_sent.sub(' _________ ', sent)
+                            if no_of_replacements < 2:
+                                blank_sentences.append(line)
+                                processed.append(sent)
+                                keys.append(key)
+                                break
             out["sentences"] = blank_sentences
             out["keys"] = keys
             # print('reached')
@@ -219,11 +218,16 @@ class FB:
         return fill_in_the_blanks
 
 
-def fitb(results, payload):
+def fitb(results, payload,  selected_specific, coref_sents):
     results['Fill in the Blanks']['questions'] = []
     results['Fill in the Blanks']['answers']
-    fb = FB(payload['input_text'])
-    output = fb.fb(int((payload['max_questions']['Fill in the Blanks']*2)))
+    necessary_coref = []
+    for item in selected_specific:
+        necessary_coref.append(coref_sents[item[2]])
+    selected_specific_sents = [item[0] for item in selected_specific]
+    logging.error('num sents fb ' + str(len(selected_specific_sents)))
+    fb = FB(' '.join(selected_specific_sents), necessary_coref)
+    output = fb.fb(int((payload['max_questions']['Fill in the Blanks']*2)), pos = {'ADJ', 'NOUN', 'NUM', 'PROPN'})
     # print(output)
     if payload['max_questions']['Fill in the Blanks'] < len(output['sentences']):
         sampled = [(output['sentences'][i], output['keys'][i]) for i in sorted(random.sample(
@@ -235,6 +239,7 @@ def fitb(results, payload):
         sample[1] for sample in sampled]}
     # print(sampled_dict)
     # try:
+    logging.error('output sents fb ' + str(len(sampled_dict['sentences'])))
     results['Fill in the Blanks']['questions'] = sampled_dict['sentences']
     results['Fill in the Blanks']['answers'] = sampled_dict['keys']
     # except ValueError:
@@ -247,28 +252,32 @@ class TF:
         self.text = payload['input_text']
         self.num_sents = payload['max_questions']['True/False']
 
-    def tf_sum(self):
-        sents = gensim.summarization.textcleaner.split_sentences(self.text)
-        # print(sents)
-        if self.num_sents >= len(sents):
-            self.text = sents
-        else:
-            ratio = self.num_sents/len(sents)
-            # print(ratio)
-            # print(gensim.summarization.INPUT_MIN_LENGTH)
-            text = gensim.summarization.summarize(
-                self.text, ratio=ratio, split=True)
-            # print(self.text)
-            if not text:
-                text = [sents[i] for i in sorted(
-                    random.sample(range(len(sents)), self.num_sents))]
-                print('random')
-            self.text = text
-        # print('summarized')
+    # def tf_sum(self):
+    #     sents = gensim.summarization.textcleaner.split_sentences(self.text)
+    #     # print(sents)
+    #     if self.num_sents >= len(sents):
+    #         self.text = sents
+    #     else:
+    #         ratio = self.num_sents/len(sents)
+    #         # print(ratio)
+    #         # print(gensim.summarization.INPUT_MIN_LENGTH)
+    #         text = gensim.summarization.summarize(
+    #             self.text, ratio=ratio, split=True)
+    #         # print(self.text)
+    #         if not text:
+    #             text = [sents[i] for i in sorted(
+    #                 random.sample(range(len(sents)), self.num_sents))]
+    #             print('random')
+    #         self.text = text
+    #     # print('summarized')
 
-    def tf(self):
+    def tf(self, selected_specific, coref_sents, gpt2_completions, executor):
         final_sents = []
-        for my_item in self.text:
+        for selected_item in selected_specific:
+            logging.error(str(type(selected_item[2])))
+            logging.error(str(selected_item))
+            logging.error(str(type(coref_sents[0])))
+            my_item = coref_sents[selected_item[2]]
             item = my_item.rstrip('?:!.,;"')
             parser_output = predictor.predict(sentence=item)
             tree_string = parser_output['trees']
@@ -321,8 +330,8 @@ class TF:
                 # orig.reverse()
                 # mini.reverse()
 
-                combined_sub_string = ''.join(mini)
-                print(combined_sub_string)
+                combined_sub_string = sub_string.replace(" ", "")
+                # print(combined_sub_string)
                 main_string_list = main_string.split()
                 last_index = len(main_string_list)
                 for i in range(last_index):
@@ -338,34 +347,31 @@ class TF:
             last_P_flattened = re.sub(r" -RRB-", ")", last_P_flattened)
             split_sentence = get_termination_portion(item, last_P_flattened)
             print('generating')
-            input_ids = GPT2tokenizer.encode(
-                split_sentence, return_tensors='tf')
-            maximum_length = len(split_sentence.split())+40
+            # input_ids = GPT2tokenizer.encode(
+            #     split_sentence, return_tensors='tf')
+            # maximum_length = len(split_sentence.split())+40
 
-            sample_outputs = GPT2model.generate(
-                input_ids,
-                do_sample=True,
-                max_length=maximum_length,
-                top_p=0.80,  # 0.85
-                top_k=30,  # 30
-                repetition_penalty=10.0,
-                num_return_sequences=10
-            )
+            # sample_outputs = GPT2model.generate(
+            #     input_ids,
+            #     do_sample=True,
+            #     max_length=maximum_length,
+            #     top_p=0.80,  # 0.85
+            #     top_k=30,  # 30
+            #     repetition_penalty=10.0,
+            #     num_return_sequences=10
+            # )
+            headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
+            API_URL = "https://api-inference.huggingface.co/models/gpt2"
 
-            generated_sentences = []
-
-            for sample_output in sample_outputs:
-                decoded_sentence = GPT2tokenizer.decode(
-                    sample_output, skip_special_tokens=True)
-                final_sentence = tokenize.sent_tokenize(decoded_sentence)[0]
-                generated_sentences.append(final_sentence)
-            my_item = my_item.strip()
-            generated_sentences = [x.strip() for x in generated_sentences]
-            generated_sentences = list(set(generated_sentences))
-            while my_item in generated_sentences:
-                generated_sentences.remove(my_item)
-            final_sents.append((my_item, generated_sentences))
-
+            def query(text):
+                data = json.dumps({"inputs": text, "parameters":{"top_k": 30, "repitition_penalty":10.0, "top_p":.80, "num_return_sequences":10,  "max_length":int(len(text)*.7)},"options": {"wait_for_model": True, "use_cache": False}})
+                # print('before')
+                response = requests.request("POST", API_URL, headers=headers, data=data)
+                # print('after')
+                return json.loads(response.content.decode("utf-8"))
+            gpt2_completions.append(executor.submit(query, split_sentence))
+            final_sents.append(coref_sents[selected_item[2]])
+        logging.error(str(final_sents))
         return final_sents
 
 
@@ -384,22 +390,36 @@ def rank_dissimilarity(gpt2_sentences):
             dissimilar_sentences.append(question[1][idx])
 
         false_sentences_list_final = list(reversed(dissimilar_sentences))
-        dissimilar_final.append((question[0], false_sentences_list_final[:5]))
+        dissimilar_final.append((question[0], false_sentences_list_final[2:7]))
     return dissimilar_final
 
 
-def tfq(results, payload):
+def tfq(results, payload, selected_specific, coref_sents, gpt2_completions, executor):
     results['True/False']['correct'] = []
     results['True/False']['incorrect'] = []
     my_tf = TF(payload)
     # try:
-    my_tf.tf_sum()
+    # my_tf.tf_sum()
     # except ValueError:
     # print('Skipped True/False')
     # else:
-    output = my_tf.tf()
+    final_sents = my_tf.tf(selected_specific, coref_sents, gpt2_completions, executor)
+    return final_sents
     # if output:
-    ranked = rank_dissimilarity(output)
+def rank_tfq(results, used_sents, gpt2completions):
+    final_sents = []
+    # logging.error(str(used_sents))
+    # logging.error(str(gpt2completions))
+    for gpt2completion, used_sent in zip(gpt2completions, used_sents):
+        generated_sentences = []
+        for sample_output in gpt2completion:
+            generated_sentences.append(nltk.sent_tokenize(sample_output['generated_text'])[0])
+        generated_sentences = [x.strip() for x in generated_sentences]
+        generated_sentences = list(set(generated_sentences))
+        while used_sent in generated_sentences:
+            generated_sentences.remove(used_sent)
+        final_sents.append((used_sent, generated_sentences))
+    ranked = rank_dissimilarity(final_sents)
     results['True/False']['correct'] = [rank[0] for rank in ranked]
     results['True/False']['incorrect'] = [rank[1] for rank in ranked]
 
@@ -436,8 +456,8 @@ class QuestionsForm(FlaskForm):
     count0 = IntegerField('Multiple Choice')
     count1 = IntegerField('True/False')
     count2 = IntegerField('Fill in the Blanks')
-    count3 = IntegerField('Yes/No')
-    count4 = IntegerField('Match Definitions')
+    # count3 = IntegerField('Yes/No')
+    # count4 = IntegerField('Match Definitions')
     # recaptcha = RecaptchaField()
     submit = SubmitField("Submit")
 
@@ -567,10 +587,16 @@ def new():
     logging.info('after qform')
     if request.method == 'POST':
         if form.validate_on_submit():
+            newStart = datetime.datetime.now()
             payload = {'question_types': [], 'input_text': '', 'max_questions': {
-                'Multiple Choice': 0, 'True/False': 0, 'Fill in the Blanks': 0, 'Yes/No': 0, 'Match Definitions': 0, }}
-            results = OrderedDict({'Multiple Choice': OrderedDict({'context': [], 'questions': [], 'answers': [], 'options': []}), 'Yes/No': OrderedDict(
-                {'questions': [], 'answers': []}), 'Fill in the Blanks': OrderedDict({'questions': [], 'answers': []}), 'True/False': OrderedDict({'correct': [], 'incorrect': []})})
+                'Multiple Choice': 0,
+                 'True/False': 0, 
+                'Fill in the Blanks': 0,
+                #  'Yes/No': 0, 'Match Definitions': 0, 
+                 }}
+            results = OrderedDict({'Multiple Choice': OrderedDict({'context': [], 'questions': [], 'answers': [], 'options': []}), 
+            # 'Yes/No': OrderedDict({'questions': [], 'answers': []}), 
+                'Fill in the Blanks': OrderedDict({'questions': [], 'answers': []}), 'True/False': OrderedDict({'correct': [], 'incorrect': []})})
             # print(payload['input_text'])
             if form.count0.data > 0:
                 payload['question_types'].append('Multiple Choice')
@@ -581,9 +607,9 @@ def new():
             if form.count2.data > 0:
                 payload['question_types'].append('Fill in the Blanks')
                 payload['max_questions']['Fill in the Blanks'] = form.count2.data
-            if form.count3.data > 0:
-                payload['question_types'].append('Yes/No')
-                payload['max_questions']['Yes/No'] = form.count3.data
+            # if form.count3.data > 0:
+            #     payload['question_types'].append('Yes/No')
+            #     payload['max_questions']['Yes/No'] = form.count3.data
             # if form.count4.data > 0:
             #     payload['question_types'].append('Match Definitions')
             #     payload['max_questions']['Match Definitions'] = form.count4.data
@@ -591,25 +617,83 @@ def new():
             # print(payload['input_text'])
             # print(results)
             # print(payload)
+            startCopy = datetime.datetime.now()
             myqg, myqe = copyer(qg, qe)
+            logging.error('copy timer' + str(datetime.datetime.now()-startCopy))
             # print('before')
             # myqe= main.BoolQGen()
             # myqg = main.QGen()
             # print('after')
-            if 'Multiple Choice' in payload['question_types']:
-                logging.info('before mcq')
-                if len(payload['input_text']) > 10:
-                    mcq(myqg, results, payload)
-                logging.info('after mcq', results)
-            if 'Yes/No' in payload['question_types']:
-                if len(payload['input_text']) > 10:
-                    boolq(myqe, results, payload)
-            if 'Fill in the Blanks' in payload['question_types']:
-                if len(payload['input_text']) > 10:
-                    fitb(results, payload)
-            if 'True/False' in payload['question_types']:
-                if len(payload['input_text']) > 10:
-                    tfq(results, payload)
+            if len(payload['input_text']) > 10:
+                startExecute = datetime.datetime.now()
+                with Executor() as executor:
+                    logging.error('startExecute' + str(datetime.datetime.now()-startExecute))
+                    if 'True/False' in payload['question_types']:
+                        headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
+                        API_URL = "https://api-inference.huggingface.co/models/gpt2"
+
+                        def query(text):
+                            data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": True, "use_cache": False}})
+                            # print('before')
+                            response = requests.request("POST", API_URL, headers=headers, data=data)
+                            # print('after')
+                            return json.loads(response.content.decode("utf-8"))
+                        executor.submit(query, 'a')
+                        logging.error('sent gpt2 request')
+                    selected_specific, coref_sents = qg.filter_coref({'input_text':payload['input_text']})
+                    for item in selected_specific:
+                        assert item[2]<len(coref_sents)
+                    # logging.error(json.dumps(selected_specific))
+                    logging.error('orig selected_specific len' + str(len(selected_specific)))
+                    selected_specific  = selected_specific[:payload['max_questions']['Multiple Choice'] + payload['max_questions']['True/False'] + payload['max_questions']['Fill in the Blanks']]
+                    random.shuffle(selected_specific)
+                    offset = 0
+                    offset_mapping = {}
+                    if 'Multiple Choice' in payload['question_types']:
+                        offset_mapping["Multiple Choice"]= offset
+                        offset += payload['max_questions']['Multiple Choice']
+                    if 'True/False' in payload['question_types']:
+                        logging.error('offsetting TF')
+                        offset_mapping["True/False"]= offset
+                        offset += payload['max_questions']['True/False']
+                    # if 'Yes/No' in payload['question_types']:
+                    #     offset_mapping["Yes/No"]= offset
+                    #     offset += payload['max_questions']['Yes/No']
+                    if 'Fill in the Blanks' in payload['question_types']:
+                        offset_mapping["Fill in the Blanks"]= offset
+                        offset += payload['max_questions']['Fill in the Blanks']
+                    # if 'Yes/No' in payload['question_types']:
+                    #     boolq(myqe, results, payload)
+                    if 'True/False' in payload['question_types']:
+                        # logging.error(str(offset))
+                        # logging.error(str(offset+payload['max_questions']['True/False']))
+                        # logging.error(str(len(selected_specific[offset:offset+payload['max_questions']['True/False']])))
+                        beginTF = datetime.datetime.now()
+                        start = offset_mapping['True/False']
+                        if selected_specific[start:start+payload['max_questions']['True/False']]:
+                            gpt2_completions = []
+                            used_sents = tfq(results, payload, selected_specific[start:start+payload['max_questions']['True/False']], coref_sents, gpt2_completions, executor)
+                        logging.error(str(datetime.datetime.now()-beginTF))
+                    if 'Multiple Choice' in payload['question_types']:
+                        logging.info('before mcq')
+                        start = offset_mapping['Multiple Choice']
+                        if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
+                            mcq(myqg, results, payload, selected_specific[start:start+payload['max_questions']['Multiple Choice']], coref_sents)
+                        logging.info('after mcq', results)
+                    if 'Fill in the Blanks' in payload['question_types']:
+                        logging.error('total before ' + str(datetime.datetime.now()-newStart))
+                        beginFB = datetime.datetime.now()
+                        start = offset_mapping['Fill in the Blanks']
+                        if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
+                            fitb(results, payload, selected_specific[start:start+payload['max_questions']['Fill in the Blanks']], coref_sents)
+                        offset += payload['max_questions']['Fill in the Blanks']
+                        logging.error('fitb timer'+str(datetime.datetime.now()-beginFB))
+                    if 'True/False' in payload['question_types']:
+                        if selected_specific[start:start+payload['max_questions']['True/False']]:
+                            beginRank = datetime.datetime.now()
+                            gpt2_outputs = [call.result() for call in gpt2_completions]
+                            rank_tfq(results, used_sents,gpt2_outputs)
+                            logging.error(str(datetime.datetime.now()-beginRank))
             # try:
             data_list = {}
             # print(payload)

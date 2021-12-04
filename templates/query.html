@@ -76,10 +76,10 @@ div.form-group>br{
                     <div class="modal-body">
                       <b>Multiple Choice:</b>
                         <br>Where was George Washington born?
-                        <br>a) Tennessee
-                        <br>b) Virgina
-                        <br>c) Massachusetts
-                        <br>d) Connecticut
+                        <br>a) Memphis, Tennessee
+                        <br>b) Westmoreland, Virgina
+                        <br>c) Boston, Massachusetts
+                        <br>d) Hartford, Connecticut
                         <hr>
                         <b>True/False:</b>
                         <br>Many countries participated militarily in the Vietnam War, including Australia and India.
@@ -87,10 +87,10 @@ div.form-group>br{
                         <b>Fill in the Blanks:</b>
                         <br>Newton's Law of _____ described the resistance of a physical object to acceleration.
                         <hr>
-                        <b>Yes/No:</b>
+                        {# <b>Yes/No:</b>
                         <br>Was John Adams the first president of the United States?
-                        <hr>
-                        <b>Match Definitions:</b>
+                        <hr> #}
+                       {# <b>Match Definitions:</b>
                       <table class="table table-borderless">    
                       <tbody>
                         <tr>
@@ -106,7 +106,7 @@ div.form-group>br{
                           <td>an interpreted high-level general-purpose programming language, with an emphasis on code readability</td>
                         </tr>
                       </tbody>
-                    </table>
+                    </table> #}
                     </div>
                   </div>
                 </div>
@@ -129,11 +129,11 @@ div.form-group>br{
                 {{form.count2(class="form-control")}}
               </div>
               {{field_error_messages(form.count2)}}
-              <div class="input-group mb-3" id = "div3">
+              {# <div class="input-group mb-3" id = "div3">
                 <span class="input-group-text" id="basic-addon1">{{form.count3.label}}</span>
                 {{form.count3(class="form-control")}}
               </div>
-              {{field_error_messages(form.count3)}}
+              {{field_error_messages(form.count3)}} #}
               {# <div class="input-group mb-3"  id = "div4">
                 <span class="input-group-text" id="basic-addon1">{{form.count4.label}}</span>
                 {{form.count4(class="form-control")}}

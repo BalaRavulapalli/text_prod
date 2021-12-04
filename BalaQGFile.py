@@ -83,11 +83,8 @@ class BalaQG:
         self.filter_toker = AutoTokenizer.from_pretrained("./distilbertfilter/checkpoint-650/")
         self.predictor = predictor
         self.nlp = nlp
-
-    def predict_mcq(self, input_dict):
-        logging.basicConfig(filename = 'example.log', level  = logging.ERROR)
+    def filter_coref(self, input_dict):
         context = input_dict['input_text']
-        max_length = input_dict['max_questions']
         with torch.no_grad():
             beginFilter = datetime.datetime.now()
             softer = torch.nn.Softmax(dim = 0)
@@ -101,46 +98,43 @@ class BalaQG:
                 if (max == 1) and ('?' not in sent):
                     specific.append([sent, softed[1], i])
             specific.sort(reverse = True, key = lambda x: x[1])
-            selected_specific = specific[:max_length]
+            selected_specific = specific
             selected_specific.sort(key = lambda x: x [2])
-            sents = selected_specific
-            logging.error('filtering ' + str(datetime.datetime.now()-beginFilter))
-            # i = 0
-            # sents2 = []
-            
-            # # while i <= (len(sents) - 1):
-            # #     if i ==(len(sents) - 1):
-            # #         sents2.append(sents[i])
-            # #     else:
-            # #         sents2.append(sents[i] + ' '+ sents[i +1])
-            # #     i +=2
-                        
-            # while i <= (len(sents) - 1):
-            #     location = sents[i][2]
-            #     temp_group = sents[i:i+2]
-            #     sents_temp = [x[0] for x in temp_group]
-            #     sents2.append([' '.join(sents_temp), location])
-            #     i +=2
-            # # text_mapping = {}
-            # # sent2_count = []
-            # # previous = 0
-            # # tempLen = 0
-            # # for sentGroup in sents2:
-            # #     sent2_count.append(previous)
-            # #     tempLen = len(nltk.sent_tokenize(sentGroup))
-            # #     previous += tempLen
+            # sents = selected_specific
             beginCoref = datetime.datetime.now()
             coref_text = improved_replace_corefs(self.nlp(context), self.predictor.predict(context)['clusters'])
             coref_sents = nltk.sent_tokenize(coref_text)
-            logging.error('coref ' + str(datetime.datetime.now()-beginCoref))
-            # assert len(sents2) == len(sent2_count)
+            logging.error('filtering ' + str(datetime.datetime.now()-beginFilter))
+        return [selected_specific, coref_sents]
+    def predict_mcq(self, input_dict, selected_specific, coref_sents):
+        logging.basicConfig(filename = 'example.log', level  = logging.ERROR)
+        context = input_dict['input_text']
+        # max_length = input_dict['max_questions']
+        with torch.no_grad():
+            # beginFilter = datetime.datetime.now()
+            softer = torch.nn.Softmax(dim = 0)
+            # sents = nltk.sent_tokenize(context)
+            # specific = []
+            # for i, sent in enumerate(sents):
+            #     sample = self.filter_toker(sent, return_tensors = "pt", add_special_tokens=True, truncation=True,  max_length=512)
+            #     logits= self.filter_model(**sample).logits.squeeze()
+            #     softed = softer(logits)
+            #     max = np.argmax(softed)
+            #     if (max == 1) and ('?' not in sent):
+            #         specific.append([sent, softed[1], i])
+            # specific.sort(reverse = True, key = lambda x: x[1])
+            # selected_specific = specific[:max_length]
+            # selected_specific.sort(key = lambda x: x [2])
+            sents = selected_specific
+            # logging.error('filtering ' + str(datetime.datetime.now()-beginFilter))
+            # beginCoref = datetime.datetime.now()
+            # coref_text = improved_replace_corefs(self.nlp(context), self.predictor.predict(context)['clusters'])
+            # coref_sents = nltk.sent_tokenize(coref_text)
+            # logging.error('coref ' + str(datetime.datetime.now()-beginCoref))
             answer_grouping = []
-            # softer = torch.nn.Softmax(dim=0)
             beginAextraction = datetime.datetime.now()
             for group in sents:
                 text = group[0]
-                # if len(answer_grouping) < max_length:
-                # with torch.no_grad():
                 tokered = self.c_a_toker(text, return_tensors="pt", add_special_tokens=True, truncation=True,  max_length=512, return_token_type_ids=True)
                 output = self.c_a_model(**tokered)
                 starts = softer(output.start_logits.cpu()[0]).tolist()
@@ -158,37 +152,15 @@ class BalaQG:
                 endOffset = offsets[endtok][0]
                 answer = text[startOffset:endOffset]
                 answer_grouping.append([coref_sents[group[2]], answer])
-                # output1 = output1.split('answers:')[1]
-                # output1 = output1.split('</s>')[0]
-                # output1 = output1.split('[A]')[:-1]
-                # output1 = [x.strip() for x in output1]
-                # output1= list(set(output1))
-                # keeping = []
-                # for output in output1:
-                #     if output in output1:
-                #         keeping.append(output)
-                # textSents = nltk.sent_tokenize(text)
-                # for kept in output1:
-                #     for i, sent in enumerate(textSents):
-                #         if kept in sent:
-                #             # print('coref', len(coref_sents))
-                #             # print('sent2_count', len(sent2_count))
-                #             # print('outerI', outerI)
-                #             # print('i', i)
-                #             # print('sent2_count[outerI]', sent2_count[outerI])
-                #             answer_grouping.append((coref_sents[location + i], kept))
-                #             break
-            # while len(answer_grouping) > max_length:
-            #     answer_grouping.pop(random.choice(range(len(answer_grouping))))
             logging.error('aExtraction ' + str(datetime.datetime.now()-beginAextraction))
             beginQG = datetime.datetime.now()
             question_grouping = []
             for sentence, answer in answer_grouping:
-                if len(question_grouping) < max_length:
-                    result = self.c_q_toker.decode(self.c_q_model.generate(**self.c_q_toker(f'context: {sentence} answer: {answer} ', return_tensors = "pt"), num_beams = 1)[0])
-                    question = result.split('question: ')[1].split('</s>')[0]
-                    if (answer.lower() not in question.lower()):
-                        question_grouping.append([question, answer, sentence])
+                # if len(question_grouping) < max_length:
+                result = self.c_q_toker.decode(self.c_q_model.generate(**self.c_q_toker(f'context: {sentence} answer: {answer} ', return_tensors = "pt"), num_beams = 1)[0])
+                question = result.split('question: ')[1].split('</s>')[0]
+                if (answer.lower() not in question.lower()):
+                    question_grouping.append([question, answer, sentence])
             logging.error('QG ' + str(datetime.datetime.now()-beginQG))
             beginDistractor = datetime.datetime.now()
             final_grouping = []
