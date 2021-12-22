@@ -30,7 +30,8 @@ from collections import OrderedDict
 import json
 import os
 import sqlite3
-
+import openai
+openai.api_key = "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"
 # Third-party libraries
 from flask import Flask, render_template, url_for, request, redirect, session, abort
 from flask_wtf import FlaskForm, RecaptchaField
@@ -78,10 +79,10 @@ def copyer(qg, qe):
     return qg2, qe2
 
 
-def mcq(qg, results, payload,  selected_specific, coref_sents):
+def mcq(qg, results, payload,  selected_specific, coref_sents, executor, uniqueUserId):
     # try:
     output = qg.predict_mcq(
-        {'input_text': payload['input_text'], 'max_questions': payload['max_questions']['Multiple Choice']},  selected_specific, coref_sents)
+        {'input_text': payload['input_text'], 'max_questions': payload['max_questions']['Multiple Choice']},  selected_specific, coref_sents, executor, uniqueUserId)
     # print(output)
     # except Exception as e:
     # with open('error.txt', mode = 'w') as myFile:
@@ -362,15 +363,15 @@ class TF:
             # )
             headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
             API_URL = "https://api-inference.huggingface.co/models/gpt2"
-
-            def query(text):
-                data = json.dumps({"inputs": text, "parameters":{"top_k": 30, "repitition_penalty":10.0, "top_p":.80, "num_return_sequences":10,  "max_length":int(len(text)*.7)},"options": {"wait_for_model": True, "use_cache": False}})
-                # print('before')
-                response = requests.request("POST", API_URL, headers=headers, data=data)
-                # print('after')
-                return json.loads(response.content.decode("utf-8"))
-            gpt2_completions.append(executor.submit(query, split_sentence))
-            final_sents.append(coref_sents[selected_item[2]])
+            if split_sentence:
+                def query(text):
+                    data = json.dumps({"inputs": text, "parameters":{"top_k": 30, "repitition_penalty":10.0, "top_p":.80, "num_return_sequences":10,  "max_length":int(len(text)*.7)},"options": {"wait_for_model": True, "use_cache": False}})
+                    # print('before')
+                    response = requests.request("POST", API_URL, headers=headers, data=data)
+                    # print('after')
+                    return json.loads(response.content.decode("utf-8"))
+                gpt2_completions.append(executor.submit(query, split_sentence))
+                final_sents.append(coref_sents[selected_item[2]])
         logging.error(str(final_sents))
         return final_sents
 
@@ -625,6 +626,10 @@ def new():
             # myqg = main.QGen()
             # print('after')
             if len(payload['input_text']) > 10:
+                uniqueUserId = ''
+                for character in current_user.email:
+                    uniqueUserId += str(ord(character))
+
                 startExecute = datetime.datetime.now()
                 with Executor() as executor:
                     logging.error('startExecute' + str(datetime.datetime.now()-startExecute))
@@ -640,6 +645,17 @@ def new():
                             return json.loads(response.content.decode("utf-8"))
                         executor.submit(query, 'a')
                         logging.error('sent gpt2 request')
+                    if 'Multiple Choice' in payload['question_types']:
+                        def fakequeryopenAI():
+                            output = openai.Completion.create(
+                            model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
+                            max_tokens = 1,
+                            stop = ["####"],
+                            temperature = .8, 
+                            prompt=f"a", 
+                            user = uniqueUserId)
+                            return output['choices'][0]['text']
+                        executor.submit(fakequeryopenAI, 'a')  
                     selected_specific, coref_sents = qg.filter_coref({'input_text':payload['input_text']})
                     for item in selected_specific:
                         assert item[2]<len(coref_sents)
@@ -671,6 +687,7 @@ def new():
                         beginTF = datetime.datetime.now()
                         start = offset_mapping['True/False']
                         if selected_specific[start:start+payload['max_questions']['True/False']]:
+                            logging.error('doing tf' + str(results))
                             gpt2_completions = []
                             used_sents = tfq(results, payload, selected_specific[start:start+payload['max_questions']['True/False']], coref_sents, gpt2_completions, executor)
                         logging.error(str(datetime.datetime.now()-beginTF))
@@ -678,18 +695,22 @@ def new():
                         logging.info('before mcq')
                         start = offset_mapping['Multiple Choice']
                         if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
-                            mcq(myqg, results, payload, selected_specific[start:start+payload['max_questions']['Multiple Choice']], coref_sents)
+                            logging.error('doing mcq' + str(results))
+                            mcq(myqg, results, payload, selected_specific[start:start+payload['max_questions']['Multiple Choice']], coref_sents, executor, uniqueUserId)
                         logging.info('after mcq', results)
                     if 'Fill in the Blanks' in payload['question_types']:
                         logging.error('total before ' + str(datetime.datetime.now()-newStart))
                         beginFB = datetime.datetime.now()
                         start = offset_mapping['Fill in the Blanks']
                         if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
+                            logging.error('doing fb' + str(results))
                             fitb(results, payload, selected_specific[start:start+payload['max_questions']['Fill in the Blanks']], coref_sents)
-                        offset += payload['max_questions']['Fill in the Blanks']
+                        # offset += payload['max_questions']['Fill in the Blanks']
                         logging.error('fitb timer'+str(datetime.datetime.now()-beginFB))
                     if 'True/False' in payload['question_types']:
+                        start = offset_mapping['True/False']
                         if selected_specific[start:start+payload['max_questions']['True/False']]:
+                            logging.error('doing tf2' + str(results))
                             beginRank = datetime.datetime.now()
                             gpt2_outputs = [call.result() for call in gpt2_completions]
                             rank_tfq(results, used_sents,gpt2_outputs)
@@ -697,6 +718,7 @@ def new():
             # try:
             data_list = {}
             # print(payload)
+            logging.error(str(results))
             for qtype in results.keys():
                 # print(qtype)
                 qtype_list = []
@@ -735,6 +757,7 @@ def new():
             logging.info('here2')
             beginRequest = datetime.datetime.now()
             gform = requests.post(url=url, json=formjson)
+            # logging.error('lenselected specific' + str(len(selected_specific)))
             logging.error('Request ' + str(datetime.datetime.now()-beginRequest))
             logging.info('2.1')
             gform.raise_for_status()

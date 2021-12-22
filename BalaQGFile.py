@@ -12,7 +12,8 @@ from pathlib import Path
 import os
 import datetime
 import logging
-
+import openai
+openai.api_key = "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"
 
 def core_logic_part(document: Doc, coref: List[int], resolved: List[str], mention_span: Span):
     final_token = document[coref[1]]
@@ -76,9 +77,9 @@ class BalaQG:
         self.c_q_model = c_q_model
         self.c_q_model.config.max_length = 512
         self.c_q_toker = c_q_tokenizer
-        self.a_o_model = GPT2LMHeadModel.from_pretrained("t5smallqano/checkpoint-10544/")
-        self.a_o_model.config.max_length = 128
-        self.a_o_toker = GPT2Tokenizer.from_pretrained("./t5smallqano/checkpoint-10544/", eos_token='<|endoftext|>')
+        # self.a_o_model = GPT2LMHeadModel.from_pretrained("t5smallqano/checkpoint-10544/")
+        # self.a_o_model.config.max_length = 128
+        # self.a_o_toker = GPT2Tokenizer.from_pretrained("./t5smallqano/checkpoint-10544/", eos_token='<|endoftext|>')
         self.filter_model = AutoModelForSequenceClassification.from_pretrained("./distilbertfilter/checkpoint-650/")
         self.filter_toker = AutoTokenizer.from_pretrained("./distilbertfilter/checkpoint-650/")
         self.predictor = predictor
@@ -106,9 +107,11 @@ class BalaQG:
             coref_sents = nltk.sent_tokenize(coref_text)
             logging.error('filtering ' + str(datetime.datetime.now()-beginFilter))
         return [selected_specific, coref_sents]
-    def predict_mcq(self, input_dict, selected_specific, coref_sents):
+    def predict_mcq(self, input_dict, selected_specific, coref_sents, executor, uniqueUserId):
         logging.basicConfig(filename = 'example.log', level  = logging.ERROR)
         context = input_dict['input_text']
+        logging.error("selected_specific: " + str(selected_specific))
+        logging.error("coref_sents: " + str(coref_sents))
         # max_length = input_dict['max_questions']
         with torch.no_grad():
             # beginFilter = datetime.datetime.now()
@@ -147,37 +150,76 @@ class BalaQG:
                 scores.sort(key = lambda x: x[1], reverse = True)
                 starttok = scores[0][0][0]
                 endtok = scores[0][0][1]
+                
                 offsets = self.c_a_toker(text, return_offsets_mapping=True)['offset_mapping']
                 startOffset = offsets[starttok][0]
                 endOffset = offsets[endtok][0]
                 answer = text[startOffset:endOffset]
                 answer_grouping.append([coref_sents[group[2]], answer])
+                if [starttok, endtok] != [np.argmax(starts), np.argmax(ends)]:
+                    logging.error('ans do not match' + str(answer))
             logging.error('aExtraction ' + str(datetime.datetime.now()-beginAextraction))
             beginQG = datetime.datetime.now()
             question_grouping = []
+            def openAIQuery(queryInput):
+                result = openai.Completion.create(
+                    model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
+                    max_tokens = 200,
+                    stop = ["####"],
+                    temperature = .75, 
+                    prompt=f"question: {queryInput['question']}\nanswer: {queryInput['answer']}\n\n##\n\n",
+                    user = uniqueUserId)['choices'][0]['text']
+                return result
+            def openAIRating(text):
+                rating = openai.Completion.create(
+                        engine="content-filter-alpha",
+                        prompt = "<|endoftext|>"+text+"\n--\nLabel:",
+                        temperature=0,
+                        max_tokens=1,
+                        top_p=1,
+                        frequency_penalty=0,
+                        presence_penalty=0,
+                        logprobs=10,
+                        user = uniqueUserId
+                        )["choices"][0]["logprobs"]["top_logprobs"][0]
+                return rating
+            openAIcompletions = []
             for sentence, answer in answer_grouping:
                 # if len(question_grouping) < max_length:
+                
+                # c_q_input = {k:v.unsqueeze(0) for k, v in c_q_input.items()}
                 result = self.c_q_toker.decode(self.c_q_model.generate(**self.c_q_toker(f'context: {sentence} answer: {answer} ', return_tensors = "pt"), num_beams = 1)[0])
                 question = result.split('question: ')[1].split('</s>')[0]
                 if (answer.lower() not in question.lower()):
+                    openAIcompletions.append(executor.submit(openAIQuery, {'question': question, 'answer': answer}))
                     question_grouping.append([question, answer, sentence])
             logging.error('QG ' + str(datetime.datetime.now()-beginQG))
             beginDistractor = datetime.datetime.now()
             final_grouping = []
-            for question, answer, sentence in question_grouping:
-                input_txt = f"question: {question} answer: {answer}"
-                encoded = self.a_o_toker.encode(input_txt, return_tensors="pt")
-                output = self.a_o_toker.decode(self.a_o_model.generate(input_ids = encoded, num_beams = 1)[0], clean_up_tokenization_spaces=True)
+            openAICompleted = [call.result() for call in openAIcompletions]
+            for item in openAICompleted:
+                executor.submit(openAIRating, item)
+            for group, completion in zip(question_grouping, openAICompleted):
+                question, answer, sentence = group
+                # input_txt = f"question: {question} answer: {answer}"
+                # encoded = self.a_o_toker.encode(input_txt, return_tensors="pt")
+                # output = self.a_o_toker.decode(self.a_o_model.generate(input_ids = encoded, num_beams = 1)[0], clean_up_tokenization_spaces=True)
+                # logging.error(str(completion))
+                output = completion
                 print(output)
                 options = []
-                split1 = output.split('option1: ')[1]
-                split2 = split1.split('option2: ')
-                options.append(split2[0])
-                split2 = split2[1]
-                split3 = split2.split('option3: ')
-                options.append(split3[0])
-                split4 = split3[1].split(" <|endoftext|>")
-                options.append(split4[0])
+                try:
+                    split1 = output.split('option1:')[1]
+                    split2 = split1.split('option2:')
+                    options.append(split2[0].strip())
+                    split2 = split2[1]
+                    split3 = split2.split('option3:')
+                    options.append(split3[0].strip())
+                    options.append(split3[1].strip())
+                except:
+                    continue
+                # split4 = split3[1].split(" <|endoftext|>")
+                # options.append(split4[0])
                 final_grouping.append([question, answer, options, sentence])
             logging.error('Distractor ' + str(datetime.datetime.now()-beginDistractor))
             func_output = {'Multiple Choice': {'questions': []}}   
@@ -193,12 +235,3 @@ class BalaQG:
                     'context': item[3]}
                 )
         return func_output
-                
-
-
-            
-
-                
-            
-
-
