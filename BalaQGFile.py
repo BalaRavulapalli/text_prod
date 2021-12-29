@@ -62,21 +62,21 @@ def improved_replace_corefs(document, clusters):
 
 class BalaQG:
     def __init__(self):
-        trained_model_path = './onnxt5/t5_squad_v1/models/'
-        encoder_path = os.path.join(trained_model_path,f"t5_squad_v1-encoder-quantized.onnx")
-        decoder_path = os.path.join(trained_model_path,f"t5_squad_v1-decoder-quantized.onnx")
-        init_decoder_path = os.path.join(trained_model_path,f"t5_squad_v1-init-decoder-quantized.onnx")
-        model_paths = encoder_path, decoder_path, init_decoder_path
-        model_sessions = get_onnx_runtime_sessions(model_paths)
-        c_q_model = OnnxT5(trained_model_path, model_sessions)
+        # trained_model_path = './onnxt5/t5_squad_v1/models/'
+        # encoder_path = os.path.join(trained_model_path,f"t5_squad_v1-encoder-quantized.onnx")
+        # decoder_path = os.path.join(trained_model_path,f"t5_squad_v1-decoder-quantized.onnx")
+        # init_decoder_path = os.path.join(trained_model_path,f"t5_squad_v1-init-decoder-quantized.onnx")
+        # model_paths = encoder_path, decoder_path, init_decoder_path
+        # model_sessions = get_onnx_runtime_sessions(model_paths)
+        # c_q_model = OnnxT5(trained_model_path, model_sessions)
 
-        c_q_tokenizer = AutoTokenizer.from_pretrained(trained_model_path)
+        # c_q_tokenizer = AutoTokenizer.from_pretrained(trained_model_path)
         predictor, nlp = load_models()
-        self.c_a_model = ElectraForQuestionAnswering.from_pretrained("./electraAextraction18381/checkpoint-18381/")
-        self.c_a_toker = ElectraTokenizerFast.from_pretrained("google/electra-base-discriminator")
-        self.c_q_model = c_q_model
-        self.c_q_model.config.max_length = 512
-        self.c_q_toker = c_q_tokenizer
+        # self.c_a_model = ElectraForQuestionAnswering.from_pretrained("./electraAextraction18381/checkpoint-18381/")
+        # self.c_a_toker = ElectraTokenizerFast.from_pretrained("google/electra-base-discriminator")
+        # self.c_q_model = c_q_model
+        # self.c_q_model.config.max_length = 512
+        # self.c_q_toker = c_q_tokenizer
         # self.a_o_model = GPT2LMHeadModel.from_pretrained("t5smallqano/checkpoint-10544/")
         # self.a_o_model.config.max_length = 128
         # self.a_o_toker = GPT2Tokenizer.from_pretrained("./t5smallqano/checkpoint-10544/", eos_token='<|endoftext|>')

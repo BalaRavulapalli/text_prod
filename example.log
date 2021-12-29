@@ -3786,3 +3786,224 @@ ERROR:root:QG 0:00:02.328640
 ERROR:root:Distractor 0:00:02.225617
 ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.', 'Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.']), ('questions', ['What civilizations did the Ancient Greeks build on?', 'Who developed some of the first astronomical models?', 'What ancient Greek mathematicians helped us understand geometry?']), ('answers', ['Egypt and Mesopotamia', 'Ancient Greeks', 'Pythagoras, Euclid, and Archimedes']), ('options', [['Persia and Babylon', 'Syria and Asia', 'Greece and Rome'], ['Renaissance Studies at the University of the South', 'Copernicus', 'Ptolemy'], ['Plato, Euclidean geometry, and Archimedes', 'None of the above is correct']])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
 ERROR:root:Request 0:00:08.075762
+ERROR:root:copy timer0:00:00.000030
+ERROR:root:startExecute0:00:00.000101
+ERROR:root:filtering 0:00:12.817258
+ERROR:root:orig selected_specific len8
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:app:Exception on /query/new [POST]
+Traceback (most recent call last):
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask_login/utils.py", line 272, in decorated_view
+    return func(*args, **kwargs)
+  File "/datadrive/qgv1/text_prod/app.py", line 723, in new
+    for x in mcq_output['Multiple Choice']['questions']:
+TypeError: list indices must be integers or slices, not str
+ERROR:root:copy timer0:00:00.000029
+ERROR:root:startExecute0:00:00.000088
+ERROR:root:filtering 0:00:08.308452
+ERROR:root:orig selected_specific len8
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.', 'Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.']), ('questions', ['Who developed some of the first astronomical models?', 'What civilizations did the Ancient Greeks build on?', 'What ancient Greek mathematicians helped us understand geometry?']), ('answers', ['Ancient Greeks', 'Egypt and Mesopotamia', 'Pythagoras, Euclid, and Archimedes']), ('options', [['ancient Roman conquistadors', 'Native American Indians', 'Chinese philosophers'], ['the Asian mainland', 'the Fertile Crescent', 'the Iberian Peninsula'], ['Proclus and Sagredo', 'Ptolemaic geometry', 'Euclidean geometry']])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:Request 0:00:13.899316
+ERROR:root:copy timer0:00:00.000032
+ERROR:root:startExecute0:00:00.000087
+ERROR:root:filtering 0:00:11.626498
+ERROR:root:orig selected_specific len8
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.']), ('questions', ['What civilizations did the Ancient Greeks build on?']), ('answers', ['Egypt and Mesopotamia']), ('options', [['the Near East and Africa', 'India and China', 'Greece and Rome']])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:Request 0:00:04.213004
+ERROR:root:startExecute0:00:00.000068
+ERROR:root:orig selected_specific len8
+ERROR:root:offsetting TF
+ERROR:root:0:00:00.000007
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:total before 0:00:03.974691
+ERROR:root:fitb timer0:00:00.000003
+ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['Greek philosophical culture is exemplified in the dialogues of Plato, who turned the questioning style of Socrates into written form.', 'Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.', 'Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.', 'He established a medical school, wrote many medical treatises, and is— because of his systematic and empirical investigation of diseases and remedies—credited with being the founder of modern medicine.', "Aristotle, Plato's student, wrote about topics as varied as biology and drama.", 'The Hippocratic oath, a medical standard for doctors, is named after him.', 'Hippocrates, another ancient Greek, is the most famous physician in antiquity.']), ('questions', ['Who turned the questioning style of Socrates into written form?', 'Who developed some of the first astronomical models?', 'What ancient Greek mathematicians helped us understand geometry?', 'What civilizations did the Ancient Greeks build on?', 'What did he study?', "Who was Plato's student?", 'What is the medical standard for doctors named after?', 'Who is the most famous physician in antiquity?']), ('answers', ['Plato', 'Ancient Greeks', 'Pythagoras, Euclid, and Archimedes', 'Egypt and Mesopotamia', 'diseases and remedies', 'Aristotle', 'The Hippocratic oath', 'Hippocrates']), ('options', [['Theodorus', '(apparently) whoever first saw fit', 'Socraticus'], ['Chinese philosophers', 'Military engineers', 'University of instructed peasants'], ['Pico della Mirandola, Marsilius of Padua, andstedt', 'Euclidean geometry was developed by the Greeks', 'Proclus and Erastus Euclidean geometry helped the Church make sense of the universe'], ['Syria and Asia Minor', 'Greece and Rome', 'the Hittite Empire and the'], ['why patients came to him', 'religious practices of the Native American Indians', 'types of spirit medicines'], ['Plato', 'Erasmus', 'Desiderius Erasmus'], ['The General Pharmaceutical Council', 'The Purity of Medical Science'], ['Sallinger', 'Sextus', 'Galen']])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:Request 0:00:15.501519
+ERROR:root:startExecute0:00:00.000093
+ERROR:root:orig selected_specific len8
+ERROR:root:offsetting TF
+ERROR:root:doing tfOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:0:00:00.000158
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:total before 0:00:03.146627
+ERROR:root:doing fbOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:fitb timer0:00:00.000097
+ERROR:app:Exception on /query/new [POST]
+Traceback (most recent call last):
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask_login/utils.py", line 272, in decorated_view
+    return func(*args, **kwargs)
+  File "/datadrive/qgv1/text_prod/app.py", line 790, in new
+    fb_output = [call.result() for call in fb_request]
+  File "/datadrive/qgv1/text_prod/app.py", line 790, in <listcomp>
+    fb_output = [call.result() for call in fb_request]
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/concurrent/futures/_base.py", line 439, in result
+    return self.__get_result()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/concurrent/futures/_base.py", line 388, in __get_result
+    raise self._exception
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/concurrent/futures/thread.py", line 57, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/datadrive/qgv1/text_prod/app.py", line 235, in query
+    response = requests.request("POST", FB_URL, data=data)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/requests/sessions.py", line 649, in send
+    adapter = self.get_adapter(url=request.url)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/requests/sessions.py", line 742, in get_adapter
+    raise InvalidSchema("No connection adapters were found for {!r}".format(url))
+requests.exceptions.InvalidSchema: No connection adapters were found for 'hhttps://dockerfbgcp-sn6tlr3gzq-uc.a.run.app'
+ERROR:root:startExecute0:00:00.000092
+ERROR:root:orig selected_specific len8
+ERROR:root:offsetting TF
+ERROR:root:doing tfOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:0:00:00.000164
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:total before 0:00:03.248729
+ERROR:root:doing fbOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:fitb timer0:00:00.000098
+ERROR:app:Exception on /query/new [POST]
+Traceback (most recent call last):
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask_login/utils.py", line 272, in decorated_view
+    return func(*args, **kwargs)
+  File "/datadrive/qgv1/text_prod/app.py", line 804, in new
+    logging.error('output sents fb ' + str(len(fb_output['questions'])))
+TypeError: list indices must be integers or slices, not str
+ERROR:root:startExecute0:00:00.000133
+ERROR:root:orig selected_specific len8
+ERROR:root:offsetting TF
+ERROR:root:doing tfOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:0:00:00.000163
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:total before 0:00:03.332925
+ERROR:root:doing fbOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:fitb timer0:00:00.000098
+ERROR:app:Exception on /query/new [POST]
+Traceback (most recent call last):
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask_login/utils.py", line 272, in decorated_view
+    return func(*args, **kwargs)
+  File "/datadrive/qgv1/text_prod/app.py", line 804, in new
+    logging.error('output sents fb ' + str(len(fb_output[0]['questions'])))
+KeyError: 'questions'
+ERROR:root:startExecute0:00:00.000059
+ERROR:root:orig selected_specific len8
+ERROR:root:offsetting TF
+ERROR:root:doing tfOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:0:00:00.000146
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:total before 0:00:03.439251
+ERROR:root:doing fbOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:fitb timer0:00:00.000086
+ERROR:root:output sents fb 1
+ERROR:root:doing tf2OrderedDict([('Multiple Choice', OrderedDict([('context', ['The Hippocratic oath, a medical standard for doctors, is named after him.', 'Hippocrates, another ancient Greek, is the most famous physician in antiquity.', 'He established a medical school, wrote many medical treatises, and is— because of his systematic and empirical investigation of diseases and remedies—credited with being the founder of modern medicine.']), ('questions', ['What is the medical standard for doctors named after?', 'Who is the most famous physician in antiquity?', 'What did he study?']), ('answers', ['The Hippocratic oath', 'Hippocrates', 'diseases and remedies']), ('options', [['The Declaration of the Rights of the Nations', 'The professions of medicine and Surgery', 'The American Medical Association'], ['Celsus', 'bus', 'Galen'], ['the benefits and the costs of varied treatment attempts', 'the lives of famous people', 'the proper way to conduct scientific research']])])), ('Fill in the Blanks', OrderedDict([('questions', ['Some of the  _________  were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.']), ('answers', ['first astronomical models'])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['The Hippocratic oath, a medical standard for doctors, is named after him.', 'Hippocrates, another ancient Greek, is the most famous physician in antiquity.', 'He established a medical school, wrote many medical treatises, and is— because of his systematic and empirical investigation of diseases and remedies—credited with being the founder of modern medicine.']), ('questions', ['What is the medical standard for doctors named after?', 'Who is the most famous physician in antiquity?', 'What did he study?']), ('answers', ['The Hippocratic oath', 'Hippocrates', 'diseases and remedies']), ('options', [['The Declaration of the Rights of the Nations', 'The professions of medicine and Surgery', 'The American Medical Association'], ['Celsus', 'bus', 'Galen'], ['the benefits and the costs of varied treatment attempts', 'the lives of famous people', 'the proper way to conduct scientific research']])])), ('Fill in the Blanks', OrderedDict([('questions', ['Some of the  _________  were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.']), ('answers', ['first astronomical models'])])), ('True/False', OrderedDict([('correct', ['Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.']), ('incorrect', [['Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks had developed and built a huge number of sophisticated and sophisticated systems for communicating with and analyzing the environment.', 'Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks were a critical part of the Roman Empire.', 'Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks have also been an invaluable resource.'], ['We owe our basic ideas about geometry and the concept of mathematical proofs to the very few men and women who have ever taught mathematics.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to the philosophers of mathematics, who understood and applied these concepts to real mathematics.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to our friends, philosophers and researchers who have worked on such topics as mathematics and algebra.']])]))])
+ERROR:root:Request 0:00:10.738551
+ERROR:root:startExecute0:00:00.000092
+ERROR:root:orig selected_specific len8
+ERROR:root:offsetting TF
+ERROR:root:doing tfOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:0:00:00.000162
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:total before 0:00:03.721910
+ERROR:root:doing fbOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:fitb timer0:00:00.000103
+ERROR:root:output sents fb 1
+ERROR:root:doing tf2OrderedDict([('Multiple Choice', OrderedDict([('context', ['We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.', 'Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.', 'He established a medical school, wrote many medical treatises, and is— because of his systematic and empirical investigation of diseases and remedies—credited with being the founder of modern medicine.']), ('questions', ['What ancient Greek mathematicians helped us understand geometry?', 'What civilizations did the Ancient Greeks build on?', 'What did he study?']), ('answers', ['Pythagoras, Euclid, and Archimedes', 'Egypt and Mesopotamia', 'diseases and remedies']), ('options', [['the Greeks defined the term "line" and "point"', 'Archimedes, Plato, and Erasim', 'Euclidean geometry and the whole number system'], ["Alexander the Great's empire", 'Greece and Rome', 'Cuneiform and hieroglyphics'], ['the effects of altitude on the human body', 'the Nativity of the Child', 'prodigies']])])), ('Fill in the Blanks', OrderedDict([('questions', ['Hippocrates, another ancient Greek, is the most  _________  in antiquity.']), ('answers', ['famous physician'])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.', 'Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.', 'He established a medical school, wrote many medical treatises, and is— because of his systematic and empirical investigation of diseases and remedies—credited with being the founder of modern medicine.']), ('questions', ['What ancient Greek mathematicians helped us understand geometry?', 'What civilizations did the Ancient Greeks build on?', 'What did he study?']), ('answers', ['Pythagoras, Euclid, and Archimedes', 'Egypt and Mesopotamia', 'diseases and remedies']), ('options', [['the Greeks defined the term "line" and "point"', 'Archimedes, Plato, and Erasim', 'Euclidean geometry and the whole number system'], ["Alexander the Great's empire", 'Greece and Rome', 'Cuneiform and hieroglyphics'], ['the effects of altitude on the human body', 'the Nativity of the Child', 'prodigies']])])), ('Fill in the Blanks', OrderedDict([('questions', ['Hippocrates, another ancient Greek, is the most  _________  in antiquity.']), ('answers', ['famous physician'])])), ('True/False', OrderedDict([('correct', ['Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.']), ('incorrect', [['Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and its rotation, and are the most accurate known astronomical model of the Earth.', 'Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the rotation of the Moon.', "Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the planet's motion around the Sun, the latter of which was determined by the motion of the planet's orbital disk."]])]))])
+ERROR:root:Request 0:00:07.848235
+ERROR:root:startExecute0:00:00.000063
+ERROR:root:orig selected_specific len8
+ERROR:root:offsetting TF
+ERROR:root:doing tfOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:0:00:00.000106
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:total before 0:00:03.369032
+ERROR:root:doing fbOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:fitb timer0:00:00.000253
+ERROR:root:output sents fb 1
+ERROR:root:doing tf2OrderedDict([('Multiple Choice', OrderedDict([('context', ['Hippocrates, another ancient Greek, is the most famous physician in antiquity.', 'Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.', 'He established a medical school, wrote many medical treatises, and is— because of his systematic and empirical investigation of diseases and remedies—credited with being the founder of modern medicine.']), ('questions', ['Who is the most famous physician in antiquity?', 'Who developed some of the first astronomical models?', 'What did he study?']), ('answers', ['Hippocrates', 'Ancient Greeks', 'diseases and remedies']), ('options', [['Celsus', 'Scipio', 'Pico della Mirandola'], ['Indian', 'Phoenician', 'Chinese'], ['presidential elections', 'parliamentary elections', 'economic conditions']])])), ('Fill in the Blanks', OrderedDict([('questions', ['Building on the discoveries and knowledge of civilizations in  _________  and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.']), ('answers', ['egypt'])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['Hippocrates, another ancient Greek, is the most famous physician in antiquity.', 'Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.', 'He established a medical school, wrote many medical treatises, and is— because of his systematic and empirical investigation of diseases and remedies—credited with being the founder of modern medicine.']), ('questions', ['Who is the most famous physician in antiquity?', 'Who developed some of the first astronomical models?', 'What did he study?']), ('answers', ['Hippocrates', 'Ancient Greeks', 'diseases and remedies']), ('options', [['Celsus', 'Scipio', 'Pico della Mirandola'], ['Indian', 'Phoenician', 'Chinese'], ['presidential elections', 'parliamentary elections', 'economic conditions']])])), ('Fill in the Blanks', OrderedDict([('questions', ['Building on the discoveries and knowledge of civilizations in  _________  and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.']), ('answers', ['egypt'])])), ('True/False', OrderedDict([('correct', ['We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.']), ('incorrect', [['We owe our basic ideas about geometry and the concept of mathematical proofs to the people of Cambridge University.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to a very good and very young group of mathematicians.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to the mathematician and the science community."']])]))])
+ERROR:root:Request 0:00:06.292084
+ERROR:root:startExecute0:00:00.000064
+ERROR:app:Exception on /query/new [POST]
+Traceback (most recent call last):
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/flask_login/utils.py", line 272, in decorated_view
+    return func(*args, **kwargs)
+  File "/datadrive/qgv1/text_prod/app.py", line 734, in new
+    list_filter_coref = filter_coref_response.json()
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/site-packages/requests/models.py", line 900, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/json/__init__.py", line 357, in loads
+    return _default_decoder.decode(s)
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/home/nravulapalli/miniconda3/envs/qgv1_env/lib/python3.8/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+ERROR:root:startExecute0:00:00.000091
+ERROR:root:orig selected_specific len8
+ERROR:root:doing mcqOrderedDict([('Multiple Choice', OrderedDict([('context', []), ('questions', []), ('answers', []), ('options', [])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:OrderedDict([('Multiple Choice', OrderedDict([('context', ['Building on the discoveries and knowledge of civilizations in Egypt and Mesopotamia, among others, the Ancient Greeks developed a sophisticated philosophical and scientific culture.', 'Some of the first astronomical models were developed by Ancient Greeks trying to describe planetary movement, the Earth’s axis, and the heliocentric system—a model that places the Sun at the center of the solar system.', 'We owe our basic ideas about geometry and the concept of mathematical proofs to ancient Greek mathematicians such as Pythagoras, Euclid, and Archimedes.']), ('questions', ['What civilizations did the Ancient Greeks build on?', 'Who developed some of the first astronomical models?', 'What ancient Greek mathematicians helped us understand geometry?']), ('answers', ['Egypt and Mesopotamia', 'Ancient Greeks', 'Pythagoras, Euclid, and Archimedes']), ('options', [['Egypt and Libya', 'Greece and Rome', 'Syria and Asia Minor'], ['Hellenistic Dinner Tables', 'Ptolemaic Astronomy', 'Renaissance Galileans'], ['Plato, Euclide, and Archimedes', 'Euclide, Plato, and Axum', 'Euclide, Plato, and Archimedes']])])), ('Fill in the Blanks', OrderedDict([('questions', []), ('answers', [])])), ('True/False', OrderedDict([('correct', []), ('incorrect', [])]))])
+ERROR:root:Request 0:00:08.966926
