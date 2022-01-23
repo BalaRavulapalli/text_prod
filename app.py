@@ -81,7 +81,7 @@ def copyer(qg, qe):
 
 
 def mcq(qg, results, payload,  selected_specific, coref_sents, executor, uniqueUserId):
-    MCQ_URL = "https://dockermcqgcp-sn6tlr3gzq-uc.a.run.app/getquestion"
+    MCQ_URL = "https://dockermcqv2gcp-sn6tlr3gzq-uc.a.run.app/getquestion"
 
     fixed_selected_specific = [[group[0], 1, group[2]] for group in selected_specific]
     def query(func_input):
@@ -430,11 +430,16 @@ def tfq(results, payload, selected_specific, coref_sents, gpt2_completions, exec
     fixed_selected_specific = [[group[0], 1, group[2]] for group in selected_specific]
     def query(func_input):
         fixed_selected_specific, coref_sents = func_input
-        data = json.dumps({"selected_specific": fixed_selected_specific, "coref_sents": coref_sents,"use_gpu": True})
+        data = json.dumps({"selected_specific": fixed_selected_specific, "coref_sents": coref_sents,
+        "use_gpu": True
+        })
         # print('before')
         response = requests.request("POST", TF_URL, data=data)
         # print('after')
-        return json.loads(response.content.decode("utf-8"))
+        if response.status_code ==200:
+            return json.loads(response.content.decode("utf-8"))
+        else:
+            return False
     tf_request = []
     tf_request.append(executor.submit(query, [fixed_selected_specific, coref_sents]))
     # try:
@@ -488,7 +493,7 @@ app.config['MAX_CONTENT_LENGTH'] = 100*1024*1024
 class QuestionsForm(FlaskForm):
     content = TextAreaField("Content",
                             validators=[InputRequired("Input is required."), DataRequired("Data is required."),
-                                        Length(min=11, message="Input must be longer than 10 characters")]
+                                        Length(min=11, message="Input must be longer than 10 characters and shorter than 5000 characters", max = 5000)]
                             )
     # checkbox = MultiCheckboxField("Question Types", choices = [('Multiple Choice', 'Multiple Choice'), ('True/False', 'True/False'), ('Fill in the Blanks', 'Fill in the Blanks'), ('Yes/No', 'Yes/No'), ('Match Definitions', 'Match Definitions')], validators =
     #     [ InputRequired("You must select  at least one option."), DataRequired("Data is required.")])
@@ -531,39 +536,49 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    with Executor() as executor:
-        # if 'True/False' in payload['question_types']:
-        headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
-        API_URL = "https://api-inference.huggingface.co/models/gpt2"
+    # with Executor() as executor:
+    #     # if 'True/False' in payload['question_types']:
+    #     headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
+    #     API_URL = "https://api-inference.huggingface.co/models/gpt2"
 
-        def query(text):
-            data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": True, "use_cache": False, "use_gpu":True}})
-            # print('before')
-            response = requests.request("POST", API_URL, headers=headers, data=data)
-            # print('after')
-            return json.loads(response.content.decode("utf-8"))
-        executor.submit(query, 'a')
-            # logging.error('sent gpt2 request')
-        # if 'Multiple Choice' in payload['question_types']:
-        def fakequeryopenAI():
-            output = openai.Completion.create(
-            model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
-            max_tokens = 1,
-            stop = ["####"],
-            temperature = .8, 
-            prompt=f"a", 
-            user = random.randrange(1, 10)*"a")
-            return output['choices'][0]['text']
-        executor.submit(fakequeryopenAI, 'a')
-        def cold_start(url):
-            response = requests.request("GET", url)
-            return json.loads(response.content.decode("utf-8"))
-        for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
-            executor.submit(cold_start, url)
+    #     def query(text):
+    #         data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": False, "use_cache": False, "use_gpu":True}})
+    #         # print('before')
+    #         response = requests.request("POST", API_URL, headers=headers, data=data)
+    #         # print('after')
+    #         return json.loads(response.content.decode("utf-8"))
+    #     begin1 = datetime.datetime.now()
+    #     executor.submit(query, 'a')
+    #     logging.error('1' + str(datetime.datetime.now()-begin1))
+    #         # logging.error('sent gpt2 request')
+    #     # if 'Multiple Choice' in payload['question_types']:
+    #     def fakequeryopenAI():
+    #         output = openai.Completion.create(
+    #         model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
+    #         max_tokens = 1,
+    #         stop = ["####"],
+    #         temperature = .8, 
+    #         prompt=f"a", 
+    #         user = random.randrange(1, 10)*"a")
+    #         return output['choices'][0]['text']
+    #     begin2 = datetime.datetime.now()
+    #     executor.submit(fakequeryopenAI, 'a')
+    #     logging.error('2' + str(datetime.datetime.now()-begin2))
+    #     def cold_start(url):
+    #         response = requests.request("GET", url)
+    #         return json.loads(response.content.decode("utf-8"))
+    #     begin4 = datetime.datetime.now()
+    #     for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
+    #         begin3 = datetime.datetime.now()
+    #         executor.submit(cold_start, url)
+    #         logging.error('3' + str(datetime.datetime.now()-begin3))
+    #     logging.error('4' + str(datetime.datetime.now()-begin4))
     if current_user.is_authenticated:
+        # logging.error('4.1' + str(datetime.datetime.now()-begin4))
         return render_template('index.html', pic=current_user.profile_pic,
                                info=[current_user.name])
     else:
+        # logging.error('4.1' + str(datetime.datetime.now()-begin4))
         return render_template('index.html',
                                # name = False,
                                info=[])
@@ -645,289 +660,354 @@ def logout():
     logout_user()
     return redirect(url_for("home"))
 
+@app.route('/coldstart', methods=['GET'])
+def coldstart():
+    with Executor() as executor:
+        executed = []
+        headers = {"Authorization": f"Bearer QRPtXHhrYcHElEtmHaXxlmfXvHRNFOOaJXIUhtbYFvmdpSMSLmUZDqXopJEnzSQWFTmMeLaYhUSIcggyugWzNwgMnatpHDdmIvvDMUMdzzMHjETXmJPDgNzdPWqoBeDj"}
+        API_URL = "https://api-inference.huggingface.co/models/gpt2"
 
+        def query(text):
+            data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": False, "use_cache": False, "use_gpu":True}})
+            # print('before')
+            response = requests.request("POST", API_URL, headers=headers, data=data)
+            # print('after')
+            return json.loads(response.content.decode("utf-8"))
+        executed.append(executor.submit(query, 'a'))
+            # logging.error('sent gpt2 request')
+        # if 'Multiple Choice' in payload['question_types']:
+        def fakequeryopenAI(text):
+            output = openai.Completion.create(
+            model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
+            max_tokens = 1,
+            stop = ["####"],
+            temperature = .8, 
+            prompt=text, 
+            user = random.randrange(1, 10)*"a")
+            return output['choices'][0]['text']
+        executed.append(executor.submit(fakequeryopenAI, 'a'))
+        def cold_start(url):
+            response = requests.request("GET", url)
+            return json.loads(response.content.decode("utf-8"))
+        for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
+            executed.append(executor.submit(cold_start, url))
+        output = [call.result() for call in executed]
+    return json.dumps(output)  
 @app.route('/query/new', methods=['GET', 'POST'])
 @login_required
 def new():
-    # logging.info('entered new 558')
-    # global form
-    # logging.info('before qform')
-    form = QuestionsForm()
-    # logging.info('after qform')
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            newStart = datetime.datetime.now()
-            payload = {'question_types': [], 'input_text': '', 'max_questions': {
-                'Multiple Choice': 0,
-                 'True/False': 0, 
-                'Fill in the Blanks': 0,
-                #  'Yes/No': 0, 'Match Definitions': 0, 
-                 }}
-            results = OrderedDict({'Multiple Choice': OrderedDict({'context': [], 'questions': [], 'answers': [], 'options': []}), 
-            # 'Yes/No': OrderedDict({'questions': [], 'answers': []}), 
-                'Fill in the Blanks': OrderedDict({'questions': [], 'answers': []}), 'True/False': OrderedDict({'correct': [], 'incorrect': []})})
-            # print(payload['input_text'])
-            if form.count0.data > 0:
-                payload['question_types'].append('Multiple Choice')
-                payload['max_questions']['Multiple Choice'] = form.count0.data
-            if form.count1.data > 0:
-                payload['question_types'].append('True/False')
-                payload['max_questions']['True/False'] = form.count1.data
-            if form.count2.data > 0:
-                payload['question_types'].append('Fill in the Blanks')
-                payload['max_questions']['Fill in the Blanks'] = form.count2.data
-            # if form.count3.data > 0:
-            #     payload['question_types'].append('Yes/No')
-            #     payload['max_questions']['Yes/No'] = form.count3.data
-            # if form.count4.data > 0:
-            #     payload['question_types'].append('Match Definitions')
-            #     payload['max_questions']['Match Definitions'] = form.count4.data
-            payload['input_text'] = form.content.data
-            # print(payload['input_text'])
-            # print(results)
-            # print(payload)
-            # startCopy = datetime.datetime.now()
-            myqg, myqe = copyer(qg, qe)
-            # logging.error('copy timer' + str(datetime.datetime.now()-startCopy))
-            # print('before')
-            # myqe= main.BoolQGen()
-            # myqg = main.QGen()
-            # print('after')
-            if len(payload['input_text']) > 10:
-                uniqueUserId = ''
-                for character in current_user.email:
-                    uniqueUserId += str(ord(character))
+    
+        # if 'True/False' in payload['question_types']:
+        # headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
+        # API_URL = "https://api-inference.huggingface.co/models/gpt2"
 
-                startExecute = datetime.datetime.now()
+        # def query(text):
+        #     data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": False, "use_cache": False, "use_gpu":True}})
+        #     # print('before')
+        #     response = requests.request("POST", API_URL, headers=headers, data=data, timeout = .1)
+        #     # print('after')
+        #     return json.loads(response.content.decode("utf-8"))
+        # executor.submit(query, 'a')
+        #     # logging.error('sent gpt2 request')
+        # # if 'Multiple Choice' in payload['question_types']:
+        # def fakequeryopenAI():
+        #     output = openai.Completion.create(
+        #     model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
+        #     max_tokens = 1,
+        #     stop = ["####"],
+        #     temperature = .8, 
+        #     prompt=f"a", 
+        #     user = random.randrange(1, 10)*"a")
+        #     return output['choices'][0]['text']
+        # executor.submit(fakequeryopenAI, 'a')
+        # def cold_start(url):
+        #     response = requests.request("GET", url)
+        #     return json.loads(response.content.decode("utf-8"))
+        # for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
+        #     executor.submit(cold_start, url)
+        # logging.info('entered new 558')
+        # global form
+        # logging.info('before qform')
+        form = QuestionsForm()
+        # logging.info('after qform')
+        if request.method == 'POST':
+            if form.validate_on_submit():
                 with Executor() as executor:
-                    logging.error('startExecute' + str(datetime.datetime.now()-startExecute))
-                    # if 'True/False' in payload['question_types']:
-                    headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
-                    API_URL = "https://api-inference.huggingface.co/models/gpt2"
+                    newStart = datetime.datetime.now()
+                    payload = {'question_types': [], 'input_text': '', 'max_questions': {
+                        'Multiple Choice': 0,
+                        'True/False': 0, 
+                        'Fill in the Blanks': 0,
+                        #  'Yes/No': 0, 'Match Definitions': 0, 
+                        }}
+                    results = OrderedDict({'Multiple Choice': OrderedDict({'context': [], 'questions': [], 'answers': [], 'options': []}), 
+                    # 'Yes/No': OrderedDict({'questions': [], 'answers': []}), 
+                        'Fill in the Blanks': OrderedDict({'questions': [], 'answers': []}), 'True/False': OrderedDict({'correct': [], 'incorrect': []})})
+                    # print(payload['input_text'])
+                    if form.count0.data > 0:
+                        payload['question_types'].append('Multiple Choice')
+                        payload['max_questions']['Multiple Choice'] = form.count0.data
+                    if form.count1.data > 0:
+                        payload['question_types'].append('True/False')
+                        payload['max_questions']['True/False'] = form.count1.data
+                    if form.count2.data > 0:
+                        payload['question_types'].append('Fill in the Blanks')
+                        payload['max_questions']['Fill in the Blanks'] = form.count2.data
+                    # if form.count3.data > 0:
+                    #     payload['question_types'].append('Yes/No')
+                    #     payload['max_questions']['Yes/No'] = form.count3.data
+                    # if form.count4.data > 0:
+                    #     payload['question_types'].append('Match Definitions')
+                    #     payload['max_questions']['Match Definitions'] = form.count4.data
+                    payload['input_text'] = form.content.data
+                    # print(payload['input_text'])
+                    # print(results)
+                    # print(payload)
+                    # startCopy = datetime.datetime.now()
+                    myqg, myqe = copyer(qg, qe)
+                    # logging.error('copy timer' + str(datetime.datetime.now()-startCopy))
+                    # print('before')
+                    # myqe= main.BoolQGen()
+                    # myqg = main.QGen()
+                    # print('after')
+                    if len(payload['input_text']) > 10:
+                        uniqueUserId = ''
+                        for character in current_user.email:
+                            uniqueUserId += str(ord(character))
 
-                    def query(text):
-                        data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": True, "use_cache": False, "use_gpu":True}})
-                        # print('before')
-                        response = requests.request("POST", API_URL, headers=headers, data=data)
-                        # print('after')
-                        return json.loads(response.content.decode("utf-8"))
-                    executor.submit(query, 'a')
-                        # logging.error('sent gpt2 request')
-                    # if 'Multiple Choice' in payload['question_types']:
-                    def fakequeryopenAI():
-                        output = openai.Completion.create(
-                        model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
-                        max_tokens = 1,
-                        stop = ["####"],
-                        temperature = .8, 
-                        prompt=f"a", 
-                        user = uniqueUserId)
-                        return output['choices'][0]['text']
-                    executor.submit(fakequeryopenAI, 'a')
-                    def cold_start(url):
-                        response = requests.request("GET", url)
-                        return json.loads(response.content.decode("utf-8"))
-                    for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
-                        executor.submit(cold_start, url)
-                    # selected_specific, coref_sents = qg.filter_coref({'input_text':payload['input_text']})
-                    filter_coref_response = requests.request("POST", 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app/filter_coref', data = json.dumps({'input_text': payload['input_text']}))
-                    logging.error('orig selected_specific len' + str(filter_coref_response.content.decode("utf-8")))
-                    list_filter_coref = filter_coref_response.json()
-                    selected_specific = list_filter_coref[0]
-                    coref_sents = list_filter_coref[1]
-                    for item in selected_specific:
-                        assert item[2]<len(coref_sents)
-                    # logging.error(json.dumps(selected_specific))
-                    logging.error('orig selected_specific len' + str(len(selected_specific)))
-                    selected_specific  = selected_specific[:payload['max_questions']['Multiple Choice'] + payload['max_questions']['True/False'] + payload['max_questions']['Fill in the Blanks']]
-                    random.shuffle(selected_specific)
-                    offset = 0
-                    offset_mapping = {}
-                    if 'Multiple Choice' in payload['question_types']:
-                        offset_mapping["Multiple Choice"]= offset
-                        offset += payload['max_questions']['Multiple Choice']
-                    if 'True/False' in payload['question_types']:
-                        logging.error('offsetting TF')
-                        offset_mapping["True/False"]= offset
-                        offset += payload['max_questions']['True/False']
-                    # if 'Yes/No' in payload['question_types']:
-                    #     offset_mapping["Yes/No"]= offset
-                    #     offset += payload['max_questions']['Yes/No']
-                    if 'Fill in the Blanks' in payload['question_types']:
-                        offset_mapping["Fill in the Blanks"]= offset
-                        offset += payload['max_questions']['Fill in the Blanks']
-                    # if 'Yes/No' in payload['question_types']:
-                    #     boolq(myqe, results, payload)
-                    if 'True/False' in payload['question_types']:
-                        # logging.error(str(offset))
-                        # logging.error(str(offset+payload['max_questions']['True/False']))
-                        # logging.error(str(len(selected_specific[offset:offset+payload['max_questions']['True/False']])))
-                        beginTF = datetime.datetime.now()
-                        start = offset_mapping['True/False']
-                        if selected_specific[start:start+payload['max_questions']['True/False']]:
-                            logging.error('doing tf' + str(results))
-                            gpt2_completions = []
-                            tf_request = tfq(results, payload, selected_specific[start:start+payload['max_questions']['True/False']], coref_sents, gpt2_completions, executor)
-                        logging.error(str(datetime.datetime.now()-beginTF))
-                    if 'Multiple Choice' in payload['question_types']:
-                        logging.info('before mcq')
-                        start = offset_mapping['Multiple Choice']
-                        if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
-                            logging.error('doing mcq' + str(results))
-                            mcq_request = mcq(myqg, results, payload, selected_specific[start:start+payload['max_questions']['Multiple Choice']], coref_sents, executor, uniqueUserId)
-                        logging.info('after mcq', results)
-                    if 'Fill in the Blanks' in payload['question_types']:
-                        logging.error('total before ' + str(datetime.datetime.now()-newStart))
-                        beginFB = datetime.datetime.now()
-                        start = offset_mapping['Fill in the Blanks']
-                        if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
-                            logging.error('doing fb' + str(results))
-                            fb_request = fitb(results, payload, selected_specific[start:start+payload['max_questions']['Fill in the Blanks']], coref_sents, executor)
-                        # offset += payload['max_questions']['Fill in the Blanks']
-                        logging.error('fitb timer'+str(datetime.datetime.now()-beginFB))
-                    if 'Fill in the Blanks' in payload['question_types']:
-                        start = offset_mapping['Fill in the Blanks']
-                        if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
-                            fb_output = [call.result() for call in fb_request]
-                            results['Fill in the Blanks']['questions'] = []
-                            results['Fill in the Blanks']['answers'] = []
-                            # print(output)
-                            # if payload['max_questions']['Fill in the Blanks'] < len(output['sentences']):
-                            #     sampled = [(output['sentences'][i], output['keys'][i]) for i in sorted(random.sample(
-                            #         range(len(output['sentences'])), payload['max_questions']['Fill in the Blanks']))]
-                            # else:
-                            #     sampled = zip(output['sentences'], output['keys'])
-                            # sampled = list(sampled)
-                            # sampled_dict = {'sentences': [sample[0] for sample in sampled], 'keys': [
-                            #     sample[1] for sample in sampled]}
-                            # print(sampled_dict)
-                            # try:
-                            logging.error('output sents fb ' + str(len(fb_output[0]['questions'])))
-                            results['Fill in the Blanks']['questions'] = fb_output[0]['questions']
-                            results['Fill in the Blanks']['answers'] = fb_output[0]['answers']
-                            # except ValueError:
-                            # pass
-                    if 'Multiple Choice' in payload['question_types']:
-                        start = offset_mapping['Multiple Choice']
-                        if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
-                            mcq_output = [call.result() for call in mcq_request]
-                            results['Multiple Choice']['context'] = []
-                            results['Multiple Choice']['questions'] = []
-                            results['Multiple Choice']['answers'] = []
-                            results['Multiple Choice']['options'] = []
-                            # try:
-                            for x in mcq_output[0]['Multiple Choice']['questions']:
-                                results['Multiple Choice']['context'].append(x['context'])
-                                results['Multiple Choice']['questions'].append(x['question_statement'])
-                                results['Multiple Choice']['answers'].append(x['answer'])
-                                results['Multiple Choice']['options'].append(x['options'])
-                    if 'True/False' in payload['question_types']:
-                        start = offset_mapping['True/False']
-                        if selected_specific[start:start+payload['max_questions']['True/False']]:
-                            logging.error('doing tf2' + str(results))
-                            # beginRank = datetime.datetime.now()
-                            # gpt2_outputs = [call.result() for call in gpt2_completions]
-                            # rank_tfq(results, used_sents,gpt2_outputs)
-                            tf_output = [call.result() for call in tf_request]
-                            correct = tf_output[0]['correct']
-                            incorrect = tf_output[0]['incorrect']
-                            results['True/False']['correct'] = correct
-                            results['True/False']['incorrect'] = incorrect
-                            # logging.error(str(datetime.datetime.now()-beginRank))
-            # try:
-            data_list = {}
-            # print(payload)
-            logging.error(str(results))
-            for qtype in results.keys():
-                # print(qtype)
-                qtype_list = []
-                for portion in results[qtype].keys():
-                    portion_list = []
-                    for text in results[qtype][portion]:
-                        portion_list.append({portion: text})
-                    qtype_list.append(portion_list)
-                zipped = list(map(list, zip(*qtype_list)))
-                data_list[qtype] = zipped
-            if payload['input_text']:
-                payload['input_text'] = unescape(payload['input_text'])
-                # print(form.content.data)
-                payload['input_text'] = escape(payload['input_text'])
-            # if form.content.data:
-            #     pass
-            # print('rendering')
-            # print(data_list)
-            empty = True
-            for qtype in data_list:
-                if data_list[qtype]:
-                    empty = False
-            if empty:
+                        # startExecute = datetime.datetime.now()
+                        # with Executor() as executor:
+                        # logging.error('startExecute' + str(datetime.datetime.now()-startExecute))
+                        # if 'True/False' in payload['question_types']:
+                        # headers = {"Authorization": f"Bearer wJuTMiDhARWIeLvVxMBQjurqDblxYgTuFXqqsUmhtsfHLHDNdPtUpWJOadpUtckHbWsEVJHkIeYpfLISthsoHbqiQNvyjkuCgQYpiizklwwjkzimZCYDGVmZXeWZpiPn"}
+                        # API_URL = "https://api-inference.huggingface.co/models/gpt2"
+
+                        # def query(text):
+                        #     data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": True, "use_cache": False, "use_gpu":True}})
+                        #     # print('before')
+                        #     response = requests.request("POST", API_URL, headers=headers, data=data)
+                        #     # print('after')
+                        #     return json.loads(response.content.decode("utf-8"))
+                        # executor.submit(query, 'a')
+                        #     # logging.error('sent gpt2 request')
+                        # # if 'Multiple Choice' in payload['question_types']:
+                        # def fakequeryopenAI():
+                        #     output = openai.Completion.create(
+                        #     model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
+                        #     max_tokens = 1,
+                        #     stop = ["####"],
+                        #     temperature = .8, 
+                        #     prompt=f"a", 
+                        #     user = uniqueUserId)
+                        #     return output['choices'][0]['text']
+                        # executor.submit(fakequeryopenAI, 'a')
+                        # def cold_start(url):
+                        #     response = requests.request("GET", url)
+                        #     return json.loads(response.content.decode("utf-8"))
+                        # for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
+                        #     executor.submit(cold_start, url)
+                        # selected_specific, coref_sents = qg.filter_coref({'input_text':payload['input_text']})
+                        filter_coref_response = requests.request("POST", 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app/filter_coref', data = json.dumps({'input_text': payload['input_text'].replace("\r", "").strip()}))
+                        logging.error('payload: ' + str(payload['input_text'].replace("\r", "").strip().__repr__()))
+                        logging.error('orig input: ' + str(payload['input_text'].__repr__()))
+                        logging.error('orig selected_specific len' + str(filter_coref_response.content.decode("utf-8")))
+                        list_filter_coref = filter_coref_response.json()
+                        selected_specific = list_filter_coref[0]
+                        coref_sents = list_filter_coref[1]
+                        for item in selected_specific:
+                            assert item[2]<len(coref_sents)
+                        # logging.error(json.dumps(selected_specific))
+                        logging.error('orig selected_specific len' + str(len(selected_specific)))
+                        selected_specific  = selected_specific[:payload['max_questions']['Multiple Choice'] + payload['max_questions']['True/False'] + payload['max_questions']['Fill in the Blanks']]
+                        # random.shuffle(selected_specific)
+                        offset = 0
+                        offset_mapping = {}
+                        if 'Multiple Choice' in payload['question_types']:
+                            offset_mapping["Multiple Choice"]= offset
+                            offset += payload['max_questions']['Multiple Choice']
+                        if 'True/False' in payload['question_types']:
+                            logging.error('offsetting TF')
+                            offset_mapping["True/False"]= offset
+                            offset += payload['max_questions']['True/False']
+                        # if 'Yes/No' in payload['question_types']:
+                        #     offset_mapping["Yes/No"]= offset
+                        #     offset += payload['max_questions']['Yes/No']
+                        if 'Fill in the Blanks' in payload['question_types']:
+                            offset_mapping["Fill in the Blanks"]= offset
+                            offset += payload['max_questions']['Fill in the Blanks']
+                        # if 'Yes/No' in payload['question_types']:
+                        #     boolq(myqe, results, payload)
+                        if 'True/False' in payload['question_types']:
+                            # logging.error(str(offset))
+                            # logging.error(str(offset+payload['max_questions']['True/False']))
+                            # logging.error(str(len(selected_specific[offset:offset+payload['max_questions']['True/False']])))
+                            beginTF = datetime.datetime.now()
+                            start = offset_mapping['True/False']
+                            if selected_specific[start:start+payload['max_questions']['True/False']]:
+                                logging.error('doing tf' + str(results))
+                                gpt2_completions = []
+                                tf_request = tfq(results, payload, selected_specific[start:start+payload['max_questions']['True/False']], coref_sents, gpt2_completions, executor)
+                            logging.error(str(datetime.datetime.now()-beginTF))
+                        if 'Multiple Choice' in payload['question_types']:
+                            logging.info('before mcq')
+                            start = offset_mapping['Multiple Choice']
+                            if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
+                                logging.error('doing mcq' + str(results))
+                                mcq_request = mcq(myqg, results, payload, selected_specific[start:start+payload['max_questions']['Multiple Choice']], coref_sents, executor, uniqueUserId)
+                            logging.info('after mcq', results)
+                        if 'Fill in the Blanks' in payload['question_types']:
+                            logging.error('total before ' + str(datetime.datetime.now()-newStart))
+                            beginFB = datetime.datetime.now()
+                            start = offset_mapping['Fill in the Blanks']
+                            if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
+                                logging.error('doing fb' + str(results))
+                                fb_request = fitb(results, payload, selected_specific[start:start+payload['max_questions']['Fill in the Blanks']], coref_sents, executor)
+                            # offset += payload['max_questions']['Fill in the Blanks']
+                            logging.error('fitb timer'+str(datetime.datetime.now()-beginFB))
+                        if 'Fill in the Blanks' in payload['question_types']:
+                            start = offset_mapping['Fill in the Blanks']
+                            if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
+                                fb_output = [call.result() for call in fb_request]
+                                results['Fill in the Blanks']['questions'] = []
+                                results['Fill in the Blanks']['answers'] = []
+                                # print(output)
+                                # if payload['max_questions']['Fill in the Blanks'] < len(output['sentences']):
+                                #     sampled = [(output['sentences'][i], output['keys'][i]) for i in sorted(random.sample(
+                                #         range(len(output['sentences'])), payload['max_questions']['Fill in the Blanks']))]
+                                # else:
+                                #     sampled = zip(output['sentences'], output['keys'])
+                                # sampled = list(sampled)
+                                # sampled_dict = {'sentences': [sample[0] for sample in sampled], 'keys': [
+                                #     sample[1] for sample in sampled]}
+                                # print(sampled_dict)
+                                # try:
+                                logging.error('output sents fb ' + str(len(fb_output[0]['questions'])))
+                                results['Fill in the Blanks']['questions'] = fb_output[0]['questions']
+                                results['Fill in the Blanks']['answers'] = fb_output[0]['answers']
+                                # except ValueError:
+                                # pass
+                        if 'Multiple Choice' in payload['question_types']:
+                            start = offset_mapping['Multiple Choice']
+                            if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
+                                mcq_output = [call.result() for call in mcq_request]
+                                results['Multiple Choice']['context'] = []
+                                results['Multiple Choice']['questions'] = []
+                                results['Multiple Choice']['answers'] = []
+                                results['Multiple Choice']['options'] = []
+                                # try:
+                                for x in mcq_output[0]['Multiple Choice']['questions']:
+                                    results['Multiple Choice']['context'].append(x['context'])
+                                    results['Multiple Choice']['questions'].append(x['question_statement'])
+                                    results['Multiple Choice']['answers'].append(x['answer'])
+                                    results['Multiple Choice']['options'].append(x['options'])
+                        if 'True/False' in payload['question_types']:
+                            start = offset_mapping['True/False']
+                            if selected_specific[start:start+payload['max_questions']['True/False']]:
+                                logging.error('doing tf2' + str(results))
+                                # beginRank = datetime.datetime.now()
+                                # gpt2_outputs = [call.result() for call in gpt2_completions]
+                                # rank_tfq(results, used_sents,gpt2_outputs)
+                                tf_output = [call.result() for call in tf_request]
+                                if tf_output[0] != False:
+                                    correct = tf_output[0]['correct']
+                                    incorrect = tf_output[0]['incorrect']
+                                    results['True/False']['correct'] = correct
+                                    results['True/False']['incorrect'] = incorrect
+                                # logging.error(str(datetime.datetime.now()-beginRank))
+                # try:
                 data_list = {}
-            # print('DataList')
-            # print(data_list)
-            # print(data_list)
-            # print(payload['input_text'])
-            
-            url = "https://script.google.com/macros/s/AKfycbzducEgq-8BPARjTx6djntN8bOenVaq9X8Ku_5z51krxhbQ4OJ26lam7k3sNQKJuqXD/exec"
-            formjson = {'data_list': data_list, 'email': current_user.email}
-            # print(current_user.email)
-            logging.info('here1')
-            # print('form_json', formjson)
-            # try:
-            logging.info('here2')
-            beginRequest = datetime.datetime.now()
-            gform = requests.post(url=url, json=formjson)
-            # logging.error('lenselected specific' + str(len(selected_specific)))
-            logging.error('Request ' + str(datetime.datetime.now()-beginRequest))
-            logging.info('2.1')
-            gform.raise_for_status()
-            logging.info('here3')
-        # except Exception as e:
-            logging.info('3.1')
-            # with open('error.txt', mode = 'w') as myFile:
-            #     myFile.write('closer' + repr(e))
-            logging.info('3.2')
-            # with open('error.txt', mode = 'w') as myFile:
-            #     myFile.write(str(gform.status_code))
-            #     myFile.write(str(gform.text))
-            logging.info(gform.text)
-            logging.info('here4')
-            form = QuestionsForm()
-            logging.info(gform.status_code)
-            gform = gform.json()
-            copyurl = re.sub(r"edit$", "copy", gform['link'])
-            # gc.collect()
-            # torch.cuda.empty_cache()
-            text = requests.get(gform['html']).text
-            logging.info(text)
-            return render_template('questions.html', input_text=payload['input_text'],
-                                   html=text,
-                                   copy=copyurl,
-                                   form=form, pic=current_user.profile_pic,
-                                   info=[current_user.name])
+                # print(payload)
+                logging.error(str(results))
+                for qtype in results.keys():
+                    # print(qtype)
+                    qtype_list = []
+                    for portion in results[qtype].keys():
+                        portion_list = []
+                        for text in results[qtype][portion]:
+                            portion_list.append({portion: text})
+                        qtype_list.append(portion_list)
+                    zipped = list(map(list, zip(*qtype_list)))
+                    data_list[qtype] = zipped
+                if payload['input_text']:
+                    payload['input_text'] = unescape(payload['input_text'])
+                    # print(form.content.data)
+                    payload['input_text'] = escape(payload['input_text'])
+                # if form.content.data:
+                #     pass
+                # print('rendering')
+                # print(data_list)
+                empty = True
+                for qtype in data_list:
+                    if data_list[qtype]:
+                        empty = False
+                if empty:
+                    data_list = {}
+                # print('DataList')
+                # print(data_list)
+                # print(data_list)
+                # print(payload['input_text'])
+                
+                url = "https://script.google.com/macros/s/AKfycbzducEgq-8BPARjTx6djntN8bOenVaq9X8Ku_5z51krxhbQ4OJ26lam7k3sNQKJuqXD/exec"
+                formjson = {'data_list': data_list, 'email': current_user.email}
+                # print(current_user.email)
+                logging.info('here1')
+                # print('form_json', formjson)
+                # try:
+                logging.info('here2')
+                beginRequest = datetime.datetime.now()
+                gform = requests.post(url=url, json=formjson)
+                # logging.error('lenselected specific' + str(len(selected_specific)))
+                logging.error('Request ' + str(datetime.datetime.now()-beginRequest))
+                logging.info('2.1')
+                gform.raise_for_status()
+                logging.info('here3')
             # except Exception as e:
-            # with open('error.txt', mode = 'w') as myFile:
-            #     myFile.write(repr(e))
-            # form = QuestionsForm()
-            return render_template('questions.html', input_text='',
-                                   all_qtypes={},
-                                   form=form, pic=current_user.profile_pic,
-                                   info=[current_user.name])
-            # print(results)
-            # session['payload']=payload
-            # session['results'] = results
-            # print(session['payload']['input_text'])
-            # print(session['results'])
-            # print('next')
-            # return redirect(url_for('questions', payload = json.dumps(payload), results = json.dumps(results)), code = 307)
-            # if form.upload.data.filename or form.content.data:
-            #     print('all is correct')
-            #     return redirect(url_for('questions'))
-            # else:
-            #     form.content.errors.append('Either the Content box or the File Upload must have data.')
-        else:
-            print('all is not correct')
-    return render_template('query.html', form=form,  pic=current_user.profile_pic,
-                           info=[current_user.name])
+                logging.info('3.1')
+                # with open('error.txt', mode = 'w') as myFile:
+                #     myFile.write('closer' + repr(e))
+                logging.info('3.2')
+                # with open('error.txt', mode = 'w') as myFile:
+                #     myFile.write(str(gform.status_code))
+                #     myFile.write(str(gform.text))
+                logging.info(gform.text)
+                logging.info('here4')
+                form = QuestionsForm()
+                logging.info(gform.status_code)
+                gform = gform.json()
+                copyurl = re.sub(r"edit$", "copy", gform['link'])
+                # gc.collect()
+                # torch.cuda.empty_cache()
+                text = requests.get(gform['html']).text
+                logging.info(text)
+                return render_template('questions.html', input_text=payload['input_text'],
+                                    html=text,
+                                    copy=copyurl,
+                                    form=form, pic=current_user.profile_pic,
+                                    info=[current_user.name])
+                # except Exception as e:
+                # with open('error.txt', mode = 'w') as myFile:
+                #     myFile.write(repr(e))
+                # form = QuestionsForm()
+                return render_template('questions.html', input_text='',
+                                    all_qtypes={},
+                                    form=form, pic=current_user.profile_pic,
+                                    info=[current_user.name])
+                # print(results)
+                # session['payload']=payload
+                # session['results'] = results
+                # print(session['payload']['input_text'])
+                # print(session['results'])
+                # print('next')
+                # return redirect(url_for('questions', payload = json.dumps(payload), results = json.dumps(results)), code = 307)
+                # if form.upload.data.filename or form.content.data:
+                #     print('all is correct')
+                #     return redirect(url_for('questions'))
+                # else:
+                #     form.content.errors.append('Either the Content box or the File Upload must have data.')
+            else:
+                print('all is not correct')
+        return render_template('query.html', form=form,  pic=current_user.profile_pic,
+                            info=[current_user.name])
 
 # @app.route('/query/questions', methods = ['GET', 'POST'])
 # @login_required

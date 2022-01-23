@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{{url_for('static', filename = './assets/css/theme.bundle.css')}}" />
     
     <!-- Title -->
-    <title>{% block title %}{% endblock %}</title>
+    <title id = 'doctitle'>{% block title %}{% endblock %}</title>
     <style>{% block styling %}{% endblock %}</style>
   </head>
   <body>
@@ -648,6 +648,25 @@
     
     <!-- Theme JS -->
     <script src="{{url_for('static', filename = './assets/js/theme.bundle.js')}}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script> 
+    var myreq;
+    if (document.getElementById('doctitle').innerHTML != '\nQuery\n'){
+      
+    $(document).ready(function () {
+      myreq = $.get("/coldstart", function(data, status){
+        console.log("Data: " + data + "\nStatus: " + status);
+      });
+      
+      
+    
+    });}
+    $(window).on('unload', function() {
+	// async: false will make the AJAX synchronous in case you're using jQuery
+	myreq.abort()
+  console.log('req aborted')
+});
+    </script>
 
   </body>
     </html>

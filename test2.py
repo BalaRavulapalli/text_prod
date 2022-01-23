@@ -7,4 +7,4 @@
 from db import get_db
 g = get_db()
 output = g.execute('SELECT * FROM user').fetchall()
-print(output)
+print([a[1] for a in output])
