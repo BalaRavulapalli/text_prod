@@ -33,7 +33,7 @@ import sqlite3
 import openai
 openai.api_key = "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"
 # Third-party libraries
-from flask import Flask, render_template, url_for, request, redirect, session, abort
+from flask import Flask, render_template, url_for, request, redirect, session, abort, Response
 from flask_wtf import FlaskForm, RecaptchaField
 from flask_wtf.file import FileAllowed
 from wtforms import FileField, IntegerField, TextAreaField, SelectMultipleField, SubmitField, PasswordField, StringField, widgets
@@ -81,7 +81,7 @@ def copyer(qg, qe):
 
 
 def mcq(qg, results, payload,  selected_specific, coref_sents, executor, uniqueUserId):
-    MCQ_URL = "https://dockermcqv2gcp-sn6tlr3gzq-uc.a.run.app/getquestion"
+    MCQ_URL = "https://dockermcqv3gcp-sn6tlr3gzq-uc.a.run.app/getquestion"
 
     fixed_selected_specific = [[group[0], 1, group[2]] for group in selected_specific]
     def query(func_input):
@@ -431,7 +431,7 @@ def tfq(results, payload, selected_specific, coref_sents, gpt2_completions, exec
     def query(func_input):
         fixed_selected_specific, coref_sents = func_input
         data = json.dumps({"selected_specific": fixed_selected_specific, "coref_sents": coref_sents,
-        "use_gpu": True
+        "use_gpu": False
         })
         # print('before')
         response = requests.request("POST", TF_URL, data=data)
@@ -663,20 +663,24 @@ def logout():
 @app.route('/coldstart', methods=['GET'])
 def coldstart():
     with Executor() as executor:
+        # tester = {}
         executed = []
         headers = {"Authorization": f"Bearer QRPtXHhrYcHElEtmHaXxlmfXvHRNFOOaJXIUhtbYFvmdpSMSLmUZDqXopJEnzSQWFTmMeLaYhUSIcggyugWzNwgMnatpHDdmIvvDMUMdzzMHjETXmJPDgNzdPWqoBeDj"}
         API_URL = "https://api-inference.huggingface.co/models/gpt2"
 
         def query(text):
-            data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": False, "use_cache": False, "use_gpu":True}})
+            # tester['hf'] = False
+            data = json.dumps({"inputs": text, "parameters":{"num_return_sequences":1,  "max_length":1},"options": {"wait_for_model": True, "use_cache": False, "use_gpu":False}})
             # print('before')
             response = requests.request("POST", API_URL, headers=headers, data=data)
             # print('after')
+            # tester['hf'] = True
             return json.loads(response.content.decode("utf-8"))
         executed.append(executor.submit(query, 'a'))
             # logging.error('sent gpt2 request')
         # if 'Multiple Choice' in payload['question_types']:
         def fakequeryopenAI(text):
+            # tester['openai'] = False
             output = openai.Completion.create(
             model="babbage:ft-natlang-ai-2021-12-01-02-21-24",
             max_tokens = 1,
@@ -684,15 +688,18 @@ def coldstart():
             temperature = .8, 
             prompt=text, 
             user = random.randrange(1, 10)*"a")
+            # tester['openai'] = True
             return output['choices'][0]['text']
         executed.append(executor.submit(fakequeryopenAI, 'a'))
         def cold_start(url):
+            # tester[url] = False
             response = requests.request("GET", url)
+            # tester[url] = True
             return json.loads(response.content.decode("utf-8"))
-        for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
+        for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqv3gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
             executed.append(executor.submit(cold_start, url))
         output = [call.result() for call in executed]
-    return json.dumps(output)  
+    return json.dumps(output)
 @app.route('/query/new', methods=['GET', 'POST'])
 @login_required
 def new():
@@ -732,6 +739,23 @@ def new():
         # logging.info('after qform')
         if request.method == 'POST':
             if form.validate_on_submit():
+                api_check_begin = datetime.datetime.now()
+                api_check = {'fb': False, 'tf': False, 'mcq': False, 'prep': False}
+                url_mapping = {'fb':'https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'mcq': 'https://dockermcqv3gcp-sn6tlr3gzq-uc.a.run.app',
+                            'prep':'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'tf':'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app'}
+                while not all(api_check.values()):
+                    for key, value in url_mapping.items():
+                        if api_check[key] == False:
+                            try:
+                                r = requests.get(value, timeout=(1, 1.5))  
+                                content = r.content.decode('utf-8')
+                                # print(content)
+                                if ('hi' in content) or ('hello' in content):
+                                    api_check[key] = True
+                            except:
+                                # print(key)
+                                pass
+                logging.error("api_check " + str(datetime.datetime.now()-api_check_begin))
                 with Executor() as executor:
                     newStart = datetime.datetime.now()
                     payload = {'question_types': [], 'input_text': '', 'max_questions': {
