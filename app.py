@@ -81,7 +81,8 @@ def copyer(qg, qe):
 
 
 def mcq(qg, results, payload,  selected_specific, coref_sents, executor, uniqueUserId):
-    MCQ_URL = "https://dockermcqv3gcp-sn6tlr3gzq-uc.a.run.app/getquestion"
+    logging.error('mcq_sents'+ str(len(selected_specific)))
+    MCQ_URL = "https://dockermcqv6gcp-sn6tlr3gzq-uc.a.run.app/getquestion"
 
     fixed_selected_specific = [[group[0], 1, group[2]] for group in selected_specific]
     def query(func_input):
@@ -224,19 +225,19 @@ class FB:
         return fill_in_the_blanks
 
 
-def fitb(results, payload,  selected_specific, coref_sents, executor):
-    FB_URL = "https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app/create_fb"
+def fitb(results, payload,  selected_specific, coref_sents, executor, uniqueUserId):
+    FB_URL = "https://dockerfbv2gcp-sn6tlr3gzq-uc.a.run.app/create_fb"
 
     fixed_selected_specific = [[group[0], 1, group[2]] for group in selected_specific]
     def query(func_input):
-        fixed_selected_specific, coref_sents = func_input
-        data = json.dumps({"selected_specific": fixed_selected_specific, "coref_sents": coref_sents,"max_questions": payload['max_questions']['Fill in the Blanks']})
+        fixed_selected_specific, coref_sents, uniqueUserId = func_input
+        data = json.dumps({"selected_specific": fixed_selected_specific, "coref_sents": coref_sents,"max_questions": payload['max_questions']['Fill in the Blanks'],"uniqueUserId": uniqueUserId})
         # print('before')
         response = requests.request("POST", FB_URL, data=data)
         # print('after')
         return json.loads(response.content.decode("utf-8"))
     fb_request = []
-    fb_request.append(executor.submit(query, [fixed_selected_specific, coref_sents]))
+    fb_request.append(executor.submit(query, [fixed_selected_specific, coref_sents, uniqueUserId]))
     return fb_request
     # results['Fill in the Blanks']['questions'] = []
     # results['Fill in the Blanks']['answers']
@@ -696,7 +697,7 @@ def coldstart():
             response = requests.request("GET", url)
             # tester[url] = True
             return json.loads(response.content.decode("utf-8"))
-        for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqv3gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
+        for url in ['https://dockerfbv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqv6gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv4gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
             executed.append(executor.submit(cold_start, url))
         output = [call.result() for call in executed]
     return json.dumps(output)
@@ -741,8 +742,8 @@ def new():
             if form.validate_on_submit():
                 api_check_begin = datetime.datetime.now()
                 api_check = {'fb': False, 'tf': False, 'mcq': False, 'prep': False}
-                url_mapping = {'fb':'https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'mcq': 'https://dockermcqv3gcp-sn6tlr3gzq-uc.a.run.app',
-                            'prep':'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'tf':'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app'}
+                url_mapping = {'fb':'https://dockerfbv2gcp-sn6tlr3gzq-uc.a.run.app', 'mcq': 'https://dockermcqv6gcp-sn6tlr3gzq-uc.a.run.app',
+                            'prep':'https://dockerprepv4gcp-sn6tlr3gzq-uc.a.run.app', 'tf':'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app'}
                 while not all(api_check.values()):
                     for key, value in url_mapping.items():
                         if api_check[key] == False:
@@ -831,7 +832,7 @@ def new():
                         # for url in ['https://dockerfbgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockermcqgcp-sn6tlr3gzq-uc.a.run.app', 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app', 'https://dockertfv2gcp-sn6tlr3gzq-uc.a.run.app']:
                         #     executor.submit(cold_start, url)
                         # selected_specific, coref_sents = qg.filter_coref({'input_text':payload['input_text']})
-                        filter_coref_response = requests.request("POST", 'https://dockerprepv2gcp-sn6tlr3gzq-uc.a.run.app/filter_coref', data = json.dumps({'input_text': payload['input_text'].replace("\r", "").strip()}))
+                        filter_coref_response = requests.request("POST", 'https://dockerprepv4gcp-sn6tlr3gzq-uc.a.run.app/filter_coref', data = json.dumps({'input_text': payload['input_text'].replace("\r", "").strip()}))
                         logging.error('payload: ' + str(payload['input_text'].replace("\r", "").strip().__repr__()))
                         logging.error('orig input: ' + str(payload['input_text'].__repr__()))
                         logging.error('orig selected_specific len' + str(filter_coref_response.content.decode("utf-8")))
@@ -885,9 +886,25 @@ def new():
                             start = offset_mapping['Fill in the Blanks']
                             if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
                                 logging.error('doing fb' + str(results))
-                                fb_request = fitb(results, payload, selected_specific[start:start+payload['max_questions']['Fill in the Blanks']], coref_sents, executor)
+                                fb_request = fitb(results, payload, selected_specific[start:start+payload['max_questions']['Fill in the Blanks']], coref_sents, executor, uniqueUserId)
                             # offset += payload['max_questions']['Fill in the Blanks']
                             logging.error('fitb timer'+str(datetime.datetime.now()-beginFB))
+                        
+                        if 'Multiple Choice' in payload['question_types']:
+                            start = offset_mapping['Multiple Choice']
+                            if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
+                                mcq_output = [call.result() for call in mcq_request]
+                                # results['Multiple Choice']['context'] = []
+                                # results['Multiple Choice']['questions'] = []
+                                # results['Multiple Choice']['answers'] = []
+                                # results['Multiple Choice']['options'] = []
+                                # try:
+                                for x in mcq_output[0]['Multiple Choice']['questions']:
+                                    results['Multiple Choice']['context'].append(x['context'])
+                                    results['Multiple Choice']['questions'].append(x['question_statement'])
+                                    results['Multiple Choice']['answers'].append(x['answer'])
+                                    results['Multiple Choice']['options'].append(x['options'])
+
                         if 'Fill in the Blanks' in payload['question_types']:
                             start = offset_mapping['Fill in the Blanks']
                             if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
@@ -905,25 +922,22 @@ def new():
                                 #     sample[1] for sample in sampled]}
                                 # print(sampled_dict)
                                 # try:
-                                logging.error('output sents fb ' + str(len(fb_output[0]['questions'])))
-                                results['Fill in the Blanks']['questions'] = fb_output[0]['questions']
-                                results['Fill in the Blanks']['answers'] = fb_output[0]['answers']
-                                # except ValueError:
-                                # pass
-                        if 'Multiple Choice' in payload['question_types']:
-                            start = offset_mapping['Multiple Choice']
-                            if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
-                                mcq_output = [call.result() for call in mcq_request]
-                                results['Multiple Choice']['context'] = []
-                                results['Multiple Choice']['questions'] = []
-                                results['Multiple Choice']['answers'] = []
-                                results['Multiple Choice']['options'] = []
-                                # try:
-                                for x in mcq_output[0]['Multiple Choice']['questions']:
+                                logging.error('output sents fb ' + str(fb_output))
+                                # results['Multiple Choice']['context'] = []
+                                # results['Fill in the Blanks']['questions'] = []
+                                # results['Fill in the Blanks']['answers'] = []
+                                # results['Fill in the Blanks']['options'] = []
+
+                                for x in fb_output[0]['Multiple Choice']['questions']:
                                     results['Multiple Choice']['context'].append(x['context'])
                                     results['Multiple Choice']['questions'].append(x['question_statement'])
                                     results['Multiple Choice']['answers'].append(x['answer'])
                                     results['Multiple Choice']['options'].append(x['options'])
+                                # results['Fill in the Blanks']['questions'] = fb_output[0]['questions']
+                                # results['Fill in the Blanks']['answers'] = fb_output[0]['answers']
+                                # except ValueError:
+                                # pass
+
                         if 'True/False' in payload['question_types']:
                             start = offset_mapping['True/False']
                             if selected_specific[start:start+payload['max_questions']['True/False']]:
