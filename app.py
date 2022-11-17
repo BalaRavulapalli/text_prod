@@ -833,9 +833,10 @@ def new():
                         #     executor.submit(cold_start, url)
                         # selected_specific, coref_sents = qg.filter_coref({'input_text':payload['input_text']})
                         filter_coref_response = requests.request("POST", 'https://dockerprepv4gcp-sn6tlr3gzq-uc.a.run.app/filter_coref', data = json.dumps({'input_text': payload['input_text'].replace("\r", "").strip()}))
-                        logging.error('payload: ' + str(payload['input_text'].replace("\r", "").strip().__repr__()))
-                        logging.error('orig input: ' + str(payload['input_text'].__repr__()))
-                        logging.error('orig selected_specific len' + str(filter_coref_response.content.decode("utf-8")))
+                        if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                            logging.error('payload: ' + str(payload['input_text'].replace("\r", "").strip().__repr__()))
+                            logging.error('orig input: ' + str(payload['input_text'].__repr__()))
+                            logging.error('orig selected_specific len' + str(filter_coref_response.content.decode("utf-8")))
                         list_filter_coref = filter_coref_response.json()
                         selected_specific = list_filter_coref[0]
                         coref_sents = list_filter_coref[1]
@@ -869,7 +870,8 @@ def new():
                             beginTF = datetime.datetime.now()
                             start = offset_mapping['True/False']
                             if selected_specific[start:start+payload['max_questions']['True/False']]:
-                                logging.error('doing tf' + str(results))
+                                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                                    logging.error('doing tf' + str(results))
                                 gpt2_completions = []
                                 tf_request = tfq(results, payload, selected_specific[start:start+payload['max_questions']['True/False']], coref_sents, gpt2_completions, executor)
                             logging.error(str(datetime.datetime.now()-beginTF))
@@ -877,7 +879,8 @@ def new():
                             logging.info('before mcq')
                             start = offset_mapping['Multiple Choice']
                             if selected_specific[start:start+payload['max_questions']['Multiple Choice']]:
-                                logging.error('doing mcq' + str(results))
+                                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                                    logging.error('doing mcq' + str(results))
                                 mcq_request = mcq(myqg, results, payload, selected_specific[start:start+payload['max_questions']['Multiple Choice']], coref_sents, executor, uniqueUserId)
                             logging.info('after mcq', results)
                         if 'Fill in the Blanks' in payload['question_types']:
@@ -885,7 +888,8 @@ def new():
                             beginFB = datetime.datetime.now()
                             start = offset_mapping['Fill in the Blanks']
                             if selected_specific[start:start+payload['max_questions']['Fill in the Blanks']]:
-                                logging.error('doing fb' + str(results))
+                                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                                    logging.error('doing fb' + str(results))
                                 fb_request = fitb(results, payload, selected_specific[start:start+payload['max_questions']['Fill in the Blanks']], coref_sents, executor, uniqueUserId)
                             # offset += payload['max_questions']['Fill in the Blanks']
                             logging.error('fitb timer'+str(datetime.datetime.now()-beginFB))
@@ -922,7 +926,8 @@ def new():
                                 #     sample[1] for sample in sampled]}
                                 # print(sampled_dict)
                                 # try:
-                                logging.error('output sents fb ' + str(fb_output))
+                                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                                    logging.error('output sents fb ' + str(fb_output))
                                 # results['Multiple Choice']['context'] = []
                                 # results['Fill in the Blanks']['questions'] = []
                                 # results['Fill in the Blanks']['answers'] = []
@@ -941,7 +946,8 @@ def new():
                         if 'True/False' in payload['question_types']:
                             start = offset_mapping['True/False']
                             if selected_specific[start:start+payload['max_questions']['True/False']]:
-                                logging.error('doing tf2' + str(results))
+                                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                                    logging.error('doing tf2' + str(results))
                                 # beginRank = datetime.datetime.now()
                                 # gpt2_outputs = [call.result() for call in gpt2_completions]
                                 # rank_tfq(results, used_sents,gpt2_outputs)
@@ -955,7 +961,8 @@ def new():
                 # try:
                 data_list = {}
                 # print(payload)
-                logging.error(str(results))
+                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                    logging.error(str(results))
                 for qtype in results.keys():
                     # print(qtype)
                     qtype_list = []
@@ -1007,7 +1014,8 @@ def new():
                 # with open('error.txt', mode = 'w') as myFile:
                 #     myFile.write(str(gform.status_code))
                 #     myFile.write(str(gform.text))
-                logging.info(gform.text)
+                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                    logging.info(gform.text)
                 logging.info('here4')
                 form = QuestionsForm()
                 logging.info(gform.status_code)
@@ -1016,7 +1024,8 @@ def new():
                 # gc.collect()
                 # torch.cuda.empty_cache()
                 text = requests.get(gform['html']).text
-                logging.info(text)
+                if ('torzi' not in current_user.email) and ('nibha' not in current_user.email):
+                    logging.info(text)
                 return render_template('questions.html', input_text=payload['input_text'],
                                     html=text,
                                     copy=copyurl,
