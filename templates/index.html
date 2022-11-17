@@ -206,7 +206,7 @@
         <div class="modal fade" id="Trailer" role="dialog"aria-labelledby="modalExampleTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content">
-              <div class="modal-body" id  = "TrailerBody">
+              <div class="modal-body" id  = "TrailerBody" data-opened = "False">
         
                 <!-- Close -->
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -772,8 +772,10 @@
 <script> 
 $(document).ready(function () {
     $("#TrailerButton").click(function () {
+      if ($("#TrailerBody").attr("data-opened") == "False"){
         $("#TrailerBody").append('<iframe width="1050em"  height = "591em" src="https://www.youtube.com/embed/tB5ULEmBV1E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
-        
+        $("#TrailerBody").attr("data-opened", "True");
+    }
     });
 
 });
