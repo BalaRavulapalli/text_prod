@@ -33,6 +33,18 @@ Questions
         </div>
         <br>
         <iframe srcdoc = "{{html}}" height= "600em" width="800em" title= "Google Form" style= "border: none;"></iframe>
+        <!-- <p>
+          <script>
+            var scriptTag = document.getElementsByTagName('script');
+            scriptTag = scriptTag[scriptTag.length - 1];
+
+            var parent = scriptTag.parentNode;
+            console.log("a");
+            // console.log(JSON.stringify("{{html | safe}}"));
+            parent.innerHTML = JSON.stringify("{{html | safe}}");
+            
+          </script>
+        </p> -->
         {#
             <b>Questions:</b><br>
             {% for qtype in all_qtypes.keys() %}
@@ -53,10 +65,190 @@ Questions
             
             <hr>
     </div>  
-    <div class="col-lg-10 offset-lg-1">
-        <a href="{{copy}}" class="btn btn-primary">Copy Google Form</a>
-        <a href="{{ url_for('new') }}" class="btn btn-success">New Query</a>
+    <div class="col-lg-auto offset-lg-1">
+      <a href="{{ url_for('new') }}" class="btn btn-success">New Query</a>
+  </div>
+  <br>
+    <div class="col-lg-auto offset-lg-1">
+        <!-- <a href="{{copy}}" class="btn btn-primary">Copy Google Form</a> -->
+        <script>
+          function myPagination(myId){
+            let text = 'Copy';
+            let hrefValue = "";
+            let help = `<a style="margin-right: 1rem" href="#">Help?</a>`;
+            if (myId == "Google Forms"){
+              if (document.getElementById(myId).getAttribute('data-href') != ""){
+              hrefValue = `href= "${document.getElementById(myId).getAttribute('data-href')}" target="_blank"`
+              help = ``;};
+            }
+            if (myId == "Quizlet"){
+              if (document.getElementById(myId).getAttribute('data-href') != ""){
+              hrefValue = `href= "javascript:quizletCopy()"`;
+              help = `<a style="margin-right: 1rem" target="_blank" href="https://youtu.be/7xM7KwNxIM8">Help?</a>`
+              }
+            }
+            if (myId == "Kahoot"){
+              if (document.getElementById(myId).getAttribute('data-href') != ""){
+              hrefValue = `href= "javascript:Download(Kahoot)" `;
+              help = `<a style="margin-right: 1rem" target="_blank" href="https://youtu.be/JQ_AJdi2gIY">Help?</a>`
+              }
+            }
+            if (myId == "Quizizz"){
+              if (document.getElementById(myId).getAttribute('data-href') != ""){
+              hrefValue = `href= "javascript:Download(Quizizz)" `;
+              help = `<a style="margin-right: 1rem" target="_blank" href="https://youtu.be/gRPvxHJTCf8">Help?</a>`
+              }
+            }
+            if (myId == "Gimkit"){
+              if (document.getElementById(myId).getAttribute('data-href') != ""){
+              hrefValue = `href= "javascript:DownloadCSV(Gimkit)" `;
+              help = `<a style="margin-right: 1rem" target="_blank" href="https://youtu.be/-hRhjONPy_M">Help?</a>`
+              }
+            }
+            if (myId =='Google Forms'){
+              text = 'Copy Google Form';
+            }
+            if (myId =='Quizlet'){
+              text = 'Copy Quizlet text to clipboard';
+            }
+            if ((myId == 'Kahoot')||(myId=='Quizizz')){
+              text = 'Download Excel';
+            }
+            if (myId == 'Gimkit'){
+              text = 'Download CSV';
+            }
+            let inner = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+  <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+  <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+</svg>  &nbsp;&nbsp;${text}`;
+            if ((myId == 'Kahoot')||(myId=='Quizizz')||(myId=='Gimkit')){
+              inner = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+</svg>  &nbsp;&nbsp;${text}`
+            }
+            
+            
+            document.getElementById('exportBox').innerHTML = `<a ${hrefValue} style='margin-bottom: 0rem !important' class='btn btn-primary'>${inner}</a>${help}`;
+              
+            for (let item of document.getElementsByName('exOp')){
+              item.classList.remove('active')};
+              document.getElementById(myId).classList.add('active');
+          }
+        </script>
+        <ul class="pagination">
+          <li class="page-item active" data-href = "{{copy}}" name = "exOp" id = "Google Forms" ><a class="page-link" onclick="myPagination('Google Forms');">Google Forms</a></li>
+          <li class="page-item" data-href = "" name = "exOp" id = "Quizlet"><a class="page-link"  onclick="myPagination('Quizlet');">Quizlet</a></li>
+          <li class="page-item" data-href = "" name = "exOp" id = "Kahoot"><a class="page-link"  onclick="myPagination('Kahoot');">Kahoot</a></li>
+          <li class="page-item" data-href = "" name = "exOp" id = "Gimkit"><a class="page-link"  onclick="myPagination('Gimkit');">Gimkit</a></li>
+          <li class="page-item" data-href = "" name = "exOp" id = "Quizizz"><a class="page-link"  onclick="myPagination('Quizizz');">Quizizz</a></li>
+          
+        </ul>
+        <script>
+          let quizletText = "";
+          var quizletObj = JSON.parse(`{{json_data | safe}}`);
+          for (let group of quizletObj["Multiple Choice"]){
+            quizletText += group[1]["questions"]+"\t"+group[2]["answers"]+"\n";
+          }
+          for (let group of quizletObj["Fill in the Blanks"]){
+            quizletText += group[0]["questions"]+"\t"+group[1]["answers"]+"\n";
+          }
+          for (let group of quizletObj["True/False"]){
+            console.log(group);
+            let index = Math.floor(Math.random()*2);
+            if (index ==0){
+              quizletText += group[0]["correct"]+"\t"+"true"+"\n";
+            }
+            if (index == 1){
+              quizletText += group[1]["incorrect"][0]+"\t"+"false"+"\n";
+            }
+            
+            
+          }
+          document.getElementById('Quizlet').setAttribute("data-href", quizletText);
+          document.getElementById('Kahoot').setAttribute("data-href", `{{json_data|safe}}`);
+          document.getElementById('Quizizz').setAttribute("data-href", `{{json_data|safe}}`);
+          document.getElementById('Gimkit').setAttribute("data-href", `{{json_data|safe}}`);
+          function quizletCopy(){
+              navigator.clipboard.writeText(document.getElementById("Quizlet").getAttribute('data-href'));
+              alert("Copied Quizlet text to clipboard");
+            }
+          function Download(type){
+            type = type.getAttribute('id');
+            console.log(type);
+            let data = document.getElementById(`${type}`).getAttribute("data-href");
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", `/${type}xlsx`, false);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(data);
+            // console.log(xhr.response);
+            // console.log(xhr.responseText);
+            function s2ab(s) {
+            let buf = new ArrayBuffer(s.length);
+            let view = new Uint8Array(buf);
+            for (let i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
+            }
+            // console.log(xhr.response);
+            // console.log(xhr.responseText);
+            let bin = atob(xhr.response);
+            let ab = s2ab(bin); // from example above
+            let blob = new Blob([ab], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;' });
+
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `${type}`+new Date().toLocaleString()+'.xlsx';
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+            alert(`${type} spreadsheet downloaded`);
+}
+function DownloadCSV(type){
+            type = type.getAttribute('id');
+            console.log(type);
+            let data = document.getElementById(`${type}`).getAttribute("data-href");
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", `/${type}csv`, false);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.send(data);
+            // console.log(xhr.response);
+            // console.log(xhr.responseText);
+            function s2ab(s) {
+            let buf = new ArrayBuffer(s.length);
+            let view = new Uint8Array(buf);
+            for (let i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
+            }
+            // console.log(xhr.response);
+            // console.log(xhr.responseText);
+            let bin = atob(xhr.response);
+            let ab = s2ab(bin); // from example above
+            let blob = new Blob([ab], { type: 'text/csv' });
+
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `${type}`+new Date().toLocaleString()+'.csv';
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+            alert(`${type} csv downloaded`);
+}
+        </script>
+        <ul class="list-group">
+          <li class="list-group-item d-flex justify-content-between align-items-center" id="exportBox" style = "padding: 1rem 1rem !important">An item</li>
+        </ul>
+        <br>
+        <script>
+          myPagination('Google Forms');
+        </script>
     </div>
-    <br>
+
+    
 </div>
 {% endblock %}

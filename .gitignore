@@ -12,6 +12,6 @@ t5smallqano/
 distilbertfilter/
 electraAextraction18381/
 onnxt5/
+sqlite_db
 br_login.py
 example.log
-tmp*
