@@ -18,6 +18,7 @@ from db import init_db_command
 from io import BytesIO
 import base64
 import pandas as pd
+
 from googletrans import Translator
 from youtube_transcript_api import YouTubeTranscriptApi
 import pickle
