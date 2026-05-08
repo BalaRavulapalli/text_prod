@@ -13,7 +13,6 @@ import os
 import datetime
 import logging
 import openai
-openai.api_key = "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"
 
 def core_logic_part(document: Doc, coref: List[int], resolved: List[str], mention_span: Span):
     final_token = document[coref[1]]
