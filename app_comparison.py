@@ -38,7 +38,6 @@ import json
 import os
 import sqlite3
 import openai
-openai.api_key = "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"
 
 # import logging
 logging.basicConfig(filename='example.log', level=logging.ERROR)
